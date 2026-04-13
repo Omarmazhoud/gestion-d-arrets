@@ -1,0 +1,59 @@
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build directories
+target/
+build/
+dist/
+node_modules/
+bin/
+out/
+.gradle/
+.mvn/
+lib/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+ENV/
+env/
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+.nb-gradle/
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+~$*
+~$*.docx
+
+# Mobile
+.expo/
+*.jks
+*.p12
+*.key
+*.keystore
+
+# Fichiers de configuration sensibles
+google-services.json
+firebase-adminsdk.json
+
+# Fichiers de compilation/logs inutiles
+build_output*.txt

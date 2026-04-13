@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "VOTRE_PROJECT_NUMBER_ICI",
+    "project_id": "VOTRE_PROJECT_ID_ICI",
+    "storage_bucket": "VOTRE_STORAGE_BUCKET_ICI.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "VOTRE_APP_ID_ICI",
+        "android_client_info": {
+          "package_name": "com.gestiontickets.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "VOTRE_CLE_API_ICI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
