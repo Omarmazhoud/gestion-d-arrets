@@ -34,8 +34,24 @@ function Stats() {
 
   useEffect(() => {
     getMachines().then((res) => setMachines(res.data)).catch(() => {});
-    getTickets().then((res) => setTickets(res.data)).catch(() => {});
     getUsers().then((res) => setUsers(res)).catch(() => {});
+    
+    getTickets().then((res) => {
+      const ticketsData = res.data;
+      setTickets(ticketsData);
+      
+      // Auto-sélection de l'année la plus récente trouvée dans les tickets
+      if (ticketsData.length > 0) {
+        const annees = ticketsData
+          .filter(t => t.dateCreation)
+          .map(t => new Date(t.dateCreation).getFullYear());
+        
+        if (annees.length > 0) {
+          const maxAnnee = Math.max(...annees);
+          setAnneeSelectionnee(maxAnnee);
+        }
+      }
+    }).catch(() => {});
   }, []);
 
   /* =========================
@@ -56,7 +72,7 @@ function Stats() {
   };
 
   /* =========================
-     2. Pannes par machine
+     2. Pannes par machine (Filtré par année)
   ========================== */
   const panneParMachine = {};
   machines.forEach((m) => {
@@ -64,9 +80,12 @@ function Stats() {
   });
 
   tickets.forEach((t) => {
-    if (t.machine && t.machine.nom) {
-      const nom = t.machine.nom;
-      panneParMachine[nom] = (panneParMachine[nom] || 0) + 1;
+    if (t.machine && t.machine.nom && t.dateCreation) {
+      const d = new Date(t.dateCreation);
+      if (d.getFullYear() === anneeSelectionnee) {
+        const nom = t.machine.nom;
+        panneParMachine[nom] = (panneParMachine[nom] || 0) + 1;
+      }
     }
   });
 
@@ -74,7 +93,7 @@ function Stats() {
     labels: Object.keys(panneParMachine),
     datasets: [
       {
-        label: "Nombre de pannes",
+        label: `Pannes en ${anneeSelectionnee}`,
         data: Object.values(panneParMachine),
         backgroundColor: "#f39c12"
       }
@@ -267,21 +286,6 @@ function Stats() {
     }
   };
 
-  /* =========================
-     8. NOUVELLES FONCTIONS : Utilisateurs En Ligne vs Hors Ligne
-  ========================== */
-  const enLigne = users.filter((u) => u.isOnline).length;
-  const horsLigne = users.length - enLigne;
-
-  const usersPieData = {
-    labels: ["En ligne", "Hors ligne"],
-    datasets: [
-      {
-        data: [enLigne, horsLigne],
-        backgroundColor: ["#2ecc71", "#7f8c8d"] // Vert pour en ligne, gris pour hors ligne
-      }
-    ]
-  };
 
   /* =========================
      9. NOUVELLES FONCTIONS : Top 3 Machines par mois
@@ -423,14 +427,6 @@ function Stats() {
           <Bar data={topMachinesData} options={topMachinesOptions} />
         </div>
 
-        <div style={cardStyle}>
-          <h4>Comparaison Utilisateurs (En ligne vs Hors ligne)</h4>
-          {users.length === 0 ? (
-            <p style={{color: "gray", textAlign: "center", marginTop: "40px"}}>Aucun utilisateur</p>
-          ) : (
-            <Pie data={usersPieData} />
-          )}
-        </div>
       </div>
     </div>
   );

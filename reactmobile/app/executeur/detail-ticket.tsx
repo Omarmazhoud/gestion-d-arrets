@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from 'expo-image-picker';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { BASE_URL } from "@/constants/api";
 
 export default function InterventionExecuteur() {
@@ -53,6 +54,8 @@ export default function InterventionExecuteur() {
   });
 
   const [imageIntervention, setImageIntervention] = useState<string | null>(null);
+  const [scanningQr, setScanningQr] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
 
   useEffect(() => {
     fetchTicket();
@@ -93,6 +96,36 @@ export default function InterventionExecuteur() {
       }
     } catch (e) {
       console.log("Erreur calcul temps arrêt", e);
+    }
+  };
+
+  const startQrScan = async () => {
+    if (!permission?.granted) {
+      const res = await requestPermission();
+      if (!res.granted) {
+        Alert.alert("Permission", "Permission d'utiliser la caméra requise pour scanner un code barre.");
+        return;
+      }
+    }
+    setScanningQr(true);
+  };
+
+  const handleBarcodeScanned = ({ type, data }: any) => {
+    setScanningQr(false);
+    try {
+      const parsedData = JSON.parse(data);
+      if (parsedData.type === 'piece' && parsedData.nom && parsedData.reference) {
+        setForm(prev => ({ 
+          ...prev, 
+          pieceRechange: parsedData.nom, 
+          referencePiece: parsedData.reference 
+        }));
+        Alert.alert("Succès", `Pièce ${parsedData.nom} (${parsedData.reference}) ajoutée avec succès !`);
+      } else {
+        Alert.alert("Erreur", "Format de code QR non reconnu pour une pièce de rechange.");
+      }
+    } catch (e) {
+      Alert.alert("Erreur", "Veuillez scanner un QR Code valide généré par le système.");
     }
   };
 
@@ -196,6 +229,27 @@ export default function InterventionExecuteur() {
   const canEditIntervention = ticket.statut === "EN_COURS" && isAssignedToMe;
 
   return (
+    <View style={{ flex: 1 }}>
+      {scanningQr ? (
+        <View style={{ flex: 1 }}>
+          <CameraView
+            style={StyleSheet.absoluteFillObject}
+            facing="back"
+            onBarcodeScanned={handleBarcodeScanned}
+            barcodeScannerSettings={{
+              barcodeTypes: ["qr"],
+            }}
+          />
+          <View style={{ position: 'absolute', bottom: 50, left: 0, right: 0, alignItems: 'center' }}>
+            <TouchableOpacity 
+              style={{ backgroundColor: 'red', padding: 15, borderRadius: 12 }}
+              onPress={() => setScanningQr(false)}
+            >
+              <Text style={{ color: 'white', fontWeight: 'bold' }}>Annuler</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : (
     <ScrollView style={styles.container}>
 
       {/* INFO DEMANDEUR */}
@@ -355,13 +409,13 @@ export default function InterventionExecuteur() {
             <Text style={styles.title}>Pièces et Photos</Text>
             <View style={styles.photoButtons}>
               <TouchableOpacity onPress={takePhoto} style={styles.iconButton}>
-                <Ionicons name="camera" size={32} color={imageIntervention ? "green" : "#0A84FF"} />
-                <Text style={{fontSize: 12, color: imageIntervention ? "green" : "#0A84FF"}}>Photo</Text>
+                <Ionicons name="camera" size={32} color={imageIntervention ? "green" : "#005A9C"} />
+                <Text style={{fontSize: 12, color: imageIntervention ? "green" : "#005A9C"}}>Photo</Text>
               </TouchableOpacity>
               
               <TouchableOpacity onPress={pickImage} style={styles.iconButton}>
-                <Ionicons name="image" size={32} color={imageIntervention ? "green" : "#0A84FF"} />
-                <Text style={{fontSize: 12, color: imageIntervention ? "green" : "#0A84FF"}}>Galerie</Text>
+                <Ionicons name="image" size={32} color={imageIntervention ? "green" : "#005A9C"} />
+                <Text style={{fontSize: 12, color: imageIntervention ? "green" : "#005A9C"}}>Galerie</Text>
               </TouchableOpacity>
 
               {imageIntervention && (
@@ -376,7 +430,7 @@ export default function InterventionExecuteur() {
               <View style={{ marginTop: 15, alignItems: "center" }}>
                 <Image 
                   source={{ uri: imageIntervention }} 
-                  style={{ width: "100%", height: 200, borderRadius: 10 }} 
+                  style={{ width: "100%", height: 200, borderRadius: 12 }} 
                   resizeMode="cover" 
                 />
                 <TouchableOpacity onPress={() => setImageIntervention(null)} style={{marginTop: 5}}>
@@ -385,6 +439,13 @@ export default function InterventionExecuteur() {
               </View>
             )}
           </View>
+
+          <TouchableOpacity 
+            style={[styles.button, { backgroundColor: '#10b981', marginTop: 15, marginBottom: 15, padding: 12 }]} 
+            onPress={startQrScan}
+          >
+            <Text style={styles.buttonText}>📷 SCANNER QR CODE PIÈCE</Text>
+          </TouchableOpacity>
 
           <TextInput
             style={styles.input}
@@ -452,6 +513,8 @@ export default function InterventionExecuteur() {
       )}
 
     </ScrollView>
+      )}
+    </View>
   );
 }
 
@@ -459,12 +522,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 15, backgroundColor: "#F5F7FA" },
   section: { backgroundColor: "#fff", padding: 15, borderRadius: 12, marginBottom: 15, elevation: 2 },
   title: { fontSize: 16, fontWeight: "bold", marginTop: 15, color: "#333", marginBottom: 5 },
-  headerTitle: { fontSize: 18, fontWeight: "bold", color: "#0A84FF", textAlign: "center", marginVertical: 10 },
+  headerTitle: { fontSize: 18, fontWeight: "bold", color: "#005A9C", textAlign: "center", marginVertical: 10 },
   input: {
     borderWidth: 1,
     borderColor: "#E1E1E1",
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     marginTop: 5,
     backgroundColor: "#fff"
   },
@@ -484,10 +547,10 @@ const styles = StyleSheet.create({
     marginTop: 30,
     alignItems: "center",
     marginBottom: 50,
-    elevation: 3
+    elevation: 8
   },
   buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  imageDisplay: { width: "100%", height: 200, borderRadius: 10, marginTop: 10 },
+  imageDisplay: { width: "100%", height: 200, borderRadius: 12, marginTop: 10 },
   refusalContainer: {
     backgroundColor: "#FFEBEB",
     padding: 15,
@@ -499,14 +562,14 @@ const styles = StyleSheet.create({
   refusalTitle: { color: "#D32F2F", fontWeight: "bold", marginBottom: 5 },
   refusalMessage: { color: "#333" },
   takeoverContainer: { padding: 20, alignItems: "center", backgroundColor: "#E3F2FD", borderRadius: 12, marginBottom: 20 },
-  takeoverButton: { backgroundColor: "#0A84FF", padding: 18, borderRadius: 12, width: "100%", alignItems: "center", flexDirection: "row", justifyContent: "center" },
+  takeoverButton: { backgroundColor: "#005A9C", padding: 18, borderRadius: 12, width: "100%", alignItems: "center", flexDirection: "row", justifyContent: "center" },
   warningText: { textAlign: "center", color: "#0D47A1", marginBottom: 15, fontWeight: "500" },
   formContainer: { backgroundColor: "#fff", padding: 15, borderRadius: 12, marginBottom: 30, elevation: 2 },
   infoLabel: { color: "#666", fontSize: 14, marginBottom: 3 },
   infoValue: { color: "#333", fontWeight: "600" },
   horizontalScroll: { marginTop: 5 },
   chip: { paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20, backgroundColor: "#F0F0F0", marginRight: 8, borderWidth: 1, borderColor: "#E0E0E0" },
-  chipSelected: { backgroundColor: "#0A84FF", borderColor: "#0A84FF" },
+  chipSelected: { backgroundColor: "#005A9C", borderColor: "#005A9C" },
   chipText: { color: "#666" },
   chipTextSelected: { color: "#fff", fontWeight: "bold" },
   defectSection: { marginBottom: 10 },
@@ -520,7 +583,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     backgroundColor: "#f0f9ff",
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#bae6fd"
   },

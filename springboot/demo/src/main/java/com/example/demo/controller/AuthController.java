@@ -34,4 +34,10 @@ public class AuthController {
     public void logout(@PathVariable String id) {
         authService.logout(id);
     }
+
+    // 💓 PING (HEARTBEAT)
+    @PostMapping("/ping/{id}")
+    public void ping(@PathVariable String id) {
+        authService.updateLastActivity(id);
+    }
 }

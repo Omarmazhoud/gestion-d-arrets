@@ -1,16 +1,21 @@
 {
   "expo": {
-    "name": "reactmobile",
-    "slug": "reactmobile",
+    "name": "Leoni Tunisia",
+    "slug": "pfe",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "LEONI",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F4F7FB"
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.votre_nom.pfe_gestion"
+      "bundleIdentifier": "com.leoni.tunisia"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,6 +24,7 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
+      "package": "com.leoni.tunisia",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },

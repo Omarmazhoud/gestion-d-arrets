@@ -38,12 +38,15 @@ public class SecteurService {
         String oldName = secteur.getNom();
         String newName = newSecteur.getNom();
         
+        // Mise à jour des champs de base
+        secteur.setNomChef(newSecteur.getNomChef());
+        secteur.setMatricule(newSecteur.getMatricule());
+
         if (!oldName.equals(newName)) {
             if (secteurRepository.existsByNom(newName)) {
                 throw new RuntimeException("Secteur name already exists");
             }
             secteur.setNom(newName);
-            secteur = secteurRepository.save(secteur);
             
             // Cascade update to other tables
             jdbcTemplate.update("UPDATE machine SET secteur = ? WHERE secteur = ?", newName, oldName);
@@ -51,7 +54,7 @@ public class SecteurService {
             jdbcTemplate.update("UPDATE ticket_panne SET secteur = ? WHERE secteur = ?", newName, oldName);
         }
         
-        return secteur;
+        return secteurRepository.save(secteur);
     }
 
     @Transactional

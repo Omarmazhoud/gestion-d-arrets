@@ -4,7 +4,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert
+  Alert,
+  Image
 } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
@@ -77,29 +78,39 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Connexion</Text>
-
-      <TextInput placeholder="Email" style={styles.input} onChangeText={setEmail} />
-      
-      <View style={styles.passwordContainer}>
-        <TextInput 
-          placeholder="Mot de passe" 
-          secureTextEntry={!showPassword} 
-          style={styles.passwordInput} 
-          onChangeText={setPassword} 
+      <View style={styles.logoContainer}>
+        <Image 
+          source={require('../../assets/images/icon.png')} 
+          style={styles.logo} 
+          resizeMode="contain" 
         />
-        <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-          <Ionicons name={showPassword ? "eye-off" : "eye"} size={24} color="#0A84FF" />
+      </View>
+      
+      <View style={styles.formBox}>
+        <Text style={styles.title}>Connexion</Text>
+
+        <TextInput placeholder="Email" style={styles.input} onChangeText={setEmail} />
+        
+        <View style={styles.passwordContainer}>
+          <TextInput 
+            placeholder="Mot de passe" 
+            secureTextEntry={!showPassword} 
+            style={styles.passwordInput} 
+            onChangeText={setPassword} 
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+            <Ionicons name={showPassword ? "eye-off" : "eye"} size={24} color="#005A9C" />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Se connecter</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push("/auth/register")}>
+          <Text style={styles.link}>Créer un compte</Text>
         </TouchableOpacity>
       </View>
-
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Se connecter</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => router.push("/auth/register")}>
-        <Text style={styles.link}>Créer un compte</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -108,53 +119,86 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
+    padding: 20,
+    backgroundColor: "#F4F7FB"
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 40
+  },
+  logo: {
+    width: 320,
+    height: 120
+  },
+  formBox: {
+    backgroundColor: "#FFFFFF",
     padding: 25,
-    backgroundColor: "#FFFFFF"
+    borderRadius: 25,
+    shadowColor: "#CBD5E1",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: "#F1F5F9"
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#0A84FF",
+    fontSize: 30,
+    fontWeight: "900",
+    color: "#005A9C",
     marginBottom: 30,
     textAlign: "center"
   },
   input: {
     borderWidth: 1,
-    borderColor: "#0A84FF",
-    padding: 14,
-    borderRadius: 10,
-    marginBottom: 15,
-    backgroundColor: "#EAF3FF"
+    borderColor: "#E2E8F0",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 20,
+    backgroundColor: "#F4F7FB",
+    fontSize: 16,
+    color: "#334155"
   },
   button: {
-    backgroundColor: "#0A84FF",
-    padding: 16,
-    borderRadius: 10,
-    alignItems: "center"
+    backgroundColor: "#005A9C",
+    padding: 18,
+    borderRadius: 16,
+    alignItems: "center",
+    marginTop: 10,
+    shadowColor: "#005A9C",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8
   },
   buttonText: {
     color: "#FFFFFF",
-    fontWeight: "bold"
+    fontWeight: "800",
+    fontSize: 16
   },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#0A84FF",
-    borderRadius: 10,
-    backgroundColor: "#EAF3FF",
-    marginBottom: 15,
+    borderColor: "#E2E8F0",
+    borderRadius: 16,
+    backgroundColor: "#F4F7FB",
+    marginBottom: 20,
   },
   passwordInput: {
     flex: 1,
-    padding: 14,
+    padding: 16,
+    fontSize: 16,
+    color: "#334155"
   },
   eyeIcon: {
-    padding: 10,
+    padding: 15,
   },
   link: {
-    color: "#0A84FF",
+    color: "#005A9C",
     textAlign: "center",
-    marginTop: 20
+    marginTop: 25,
+    fontWeight: "600",
+    fontSize: 15
   }
 });

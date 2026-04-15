@@ -52,6 +52,8 @@ public class MailService {
         mailSender.send(message);
 
     } catch (MessagingException | UnsupportedEncodingException | MailException e) {
+        System.err.println("ERREUR LORS DE L'ENVOI DU MAIL : " + e.getMessage());
+        e.printStackTrace();
     }
 }
 

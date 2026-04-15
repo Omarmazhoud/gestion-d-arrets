@@ -5,11 +5,12 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
-  TextInput
+  TextInput,
+  Image
 } from "react-native";
-
+import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import axios from "axios";
 import { BASE_URL } from "@/constants/api";
 
@@ -22,7 +23,7 @@ type Ticket = {
 };
 
 export default function QualiteVerif() {
-
+  const router = useRouter();
   const { userId } = useLocalSearchParams();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [refusalMessage, setRefusalMessage] = useState("");
@@ -75,7 +76,12 @@ export default function QualiteVerif() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Validation Qualité</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#005A9C" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Validation Qualité</Text>
+      </View>
 
       {tickets.length === 0 ? (
         <Text style={styles.empty}>Aucun ticket à valider</Text>
@@ -145,20 +151,63 @@ export default function QualiteVerif() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#FFFFFF", paddingTop: 50 },
-  title: { fontSize: 22, fontWeight: "bold", color: "#0A84FF", marginBottom: 20 },
-  empty: { textAlign: "center", marginTop: 50, color: "gray" },
-  card: { backgroundColor: "#EAF3FF", padding: 15, borderRadius: 10, marginBottom: 15 },
-  type: { fontWeight: "bold", fontSize: 16, marginBottom: 5 },
-  desc: { color: "#555", marginBottom: 10 },
-  subtitle: { fontWeight: "bold", fontSize: 14, marginTop: 5 },
-  interventionBox: { backgroundColor: "#fff", padding: 10, borderRadius: 5, marginTop: 5 },
-  buttons: { flexDirection: "row", marginTop: 15 },
-  validate: { backgroundColor: "green", padding: 12, borderRadius: 8, marginRight: 10, flex: 1, alignItems: "center" },
-  refuse: { backgroundColor: "red", padding: 12, borderRadius: 8, flex: 1, alignItems: "center" },
-  btnText: { color: "white", fontWeight: "bold" },
-  refuseInputBox: { marginTop: 10 },
-  input: { borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 8, backgroundColor: "white" },
-  btnConfirmRefuse: { backgroundColor: "red", padding: 10, borderRadius: 8, marginRight: 10, marginTop: 10 },
-  btnCancel: { backgroundColor: "gray", padding: 10, borderRadius: 8, marginTop: 10 }
+  container: {
+    flex: 1,
+    backgroundColor: "#F4F7FB",
+    paddingTop: 45
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    backgroundColor: "#FFFFFF",
+    paddingBottom: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    shadowColor: "#005A9C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 8,
+    marginBottom: 20
+  },
+  backButton: {
+    padding: 10,
+    marginRight: 5,
+    backgroundColor: "#F0F5FA",
+    borderRadius: 15,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#005A9C",
+    marginLeft: 10
+  },
+  empty: { textAlign: "center", marginTop: 50, color: "gray", fontSize: 16, fontWeight: "500" },
+  card: {
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    marginHorizontal: 15,
+    borderRadius: 20,
+    marginBottom: 15,
+    shadowColor: "#CBD5E1",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#e2e8f0"
+  },
+  type: { fontWeight: "800", fontSize: 18, marginBottom: 8, color: "#1e293b" },
+  desc: { color: "#475569", marginBottom: 15, fontSize: 14, lineHeight: 22 },
+  subtitle: { fontWeight: "700", fontSize: 14, marginTop: 5, color: "#1e293b" },
+  interventionBox: { backgroundColor: "#F8FAFC", padding: 15, borderRadius: 12, marginTop: 5, borderWidth: 1, borderColor: "#e2e8f0" },
+  buttons: { flexDirection: "row", marginTop: 20 },
+  validate: { backgroundColor: "#10B981", padding: 16, borderRadius: 16, marginRight: 10, flex: 1, alignItems: "center", shadowColor: "#10B981", shadowOpacity: 0.3, shadowRadius: 5, shadowOffset: {width:0, height:4}, elevation: 5 },
+  refuse: { backgroundColor: "#EF4444", padding: 16, borderRadius: 16, flex: 1, alignItems: "center", shadowColor: "#EF4444", shadowOpacity: 0.3, shadowRadius: 5, shadowOffset: {width:0, height:4}, elevation: 5 },
+  btnText: { color: "white", fontWeight: "800", fontSize: 14 },
+  refuseInputBox: { marginTop: 15 },
+  input: { borderWidth: 1, borderColor: "#cbd5e1", padding: 15, borderRadius: 16, backgroundColor: "white", fontSize: 16 },
+  btnConfirmRefuse: { backgroundColor: "#EF4444", padding: 14, borderRadius: 12, marginRight: 10, marginTop: 15, flex: 1, alignItems: "center" },
+  btnCancel: { backgroundColor: "#64748b", padding: 14, borderRadius: 12, flex: 1, alignItems: "center", marginTop: 15 }
 });

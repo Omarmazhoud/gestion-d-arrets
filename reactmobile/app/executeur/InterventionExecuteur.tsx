@@ -88,7 +88,7 @@ marginBottom:20
 
 input:{
 borderWidth:1,
-borderColor:"#0A84FF",
+borderColor:"#005A9C",
 padding:12,
 borderRadius:8,
 marginTop:20

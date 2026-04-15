@@ -3,6 +3,7 @@ package com.example.demo.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 
 import com.example.demo.model.entity.Utilisateur;
 import com.example.demo.repository.UtilisateurRepository;
@@ -45,6 +46,7 @@ public class AuthService {
         }
 
         user.setOnline(true);
+        user.setDerniereActivite(LocalDateTime.now());
         return utilisateurRepository.save(user);
     }
 
@@ -53,5 +55,14 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
         user.setOnline(false);
         utilisateurRepository.save(user);
+    }
+
+    public void updateLastActivity(String userId) {
+        Utilisateur user = utilisateurRepository.findById(userId).orElse(null);
+        if (user != null) {
+            user.setDerniereActivite(LocalDateTime.now());
+            user.setOnline(true);
+            utilisateurRepository.save(user);
+        }
     }
 }

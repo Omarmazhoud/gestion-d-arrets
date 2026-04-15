@@ -429,6 +429,13 @@ public class TicketPanneService {
             throw new RuntimeException("Impossible de supprimer un ticket fermé");
         }
 
+        // Libérer la machine si le ticket est supprimé
+        if (ticket.getMachine() != null) {
+            Machine machine = ticket.getMachine();
+            machine.setEnArret(false);
+            machineRepo.save(machine);
+        }
+
         ticketRepo.delete(ticket);
     }
 
@@ -480,6 +487,30 @@ public class TicketPanneService {
         if (data.getCommentaireIntervention() != null) ticket.setCommentaireIntervention(data.getCommentaireIntervention());
         if (data.getCommentaireVerification() != null) ticket.setCommentaireVerification(data.getCommentaireVerification());
         if (data.getDuree() != null) ticket.setDuree(data.getDuree());
+
+        // Update Demandeur (if ID provided)
+        if (data.getDemandeur() != null && data.getDemandeur().getId() != null) {
+            Utilisateur d = utilisateurRepo.findById(data.getDemandeur().getId()).orElse(null);
+            if (d != null) {
+                ticket.setDemandeur(d);
+                ticket.setNomPrenom(d.getNom());
+                ticket.setMatricule(d.getMatricule());
+            }
+        }
+
+        // Update Executeur (if ID provided)
+        if (data.getExecuteur() != null && data.getExecuteur().getId() != null) {
+            Utilisateur e = utilisateurRepo.findById(data.getExecuteur().getId()).orElse(null);
+            if (e != null) {
+                ticket.setExecuteur(e);
+                ticket.setTypeExecuteur(e.getTypeExecuteur());
+            } else {
+                ticket.setExecuteur(null);
+            }
+        } else if (data.getTypeExecuteur() != null) {
+            // Permet de changer le type d'exécuteur cible si aucun exécuteur précis n'est mis
+            ticket.setTypeExecuteur(data.getTypeExecuteur());
+        }
 
         // Update statut if changed and handle machine state if closing
         if (data.getStatut() != null && data.getStatut() != ticket.getStatut()) {

@@ -7,6 +7,8 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { BASE_URL } from "@/constants/api";
 
 type Ticket = {
@@ -19,6 +21,7 @@ type Ticket = {
 
 export default function Historique() {
 
+  const router = useRouter();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [filter, setFilter] = useState<"TOUS" | "AUJOURD_HUI">("TOUS");
 
@@ -46,7 +49,12 @@ export default function Historique() {
   return (
     <View style={styles.container}>
 
-      <Text style={styles.title}>Historique</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#005A9C" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Historique</Text>
+      </View>
 
       {/* FILTRE */}
       <View style={styles.filterContainer}>
@@ -58,7 +66,7 @@ export default function Historique() {
           ]}
           onPress={() => setFilter("TOUS")}
         >
-          <Text>Tout</Text>
+          <Text style={[styles.filterText, filter === "TOUS" && {color: "#FFF"}]}>Tout</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -68,7 +76,7 @@ export default function Historique() {
           ]}
           onPress={() => setFilter("AUJOURD_HUI")}
         >
-          <Text>Aujourd'hui</Text>
+          <Text style={[styles.filterText, filter === "AUJOURD_HUI" && {color: "#FFF"}]}>Aujourd'hui</Text>
         </TouchableOpacity>
 
       </View>
@@ -100,49 +108,100 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#F4F7FB",
+    paddingTop: 45
   },
-
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#0A84FF",
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    backgroundColor: "#FFFFFF",
+    paddingBottom: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    shadowColor: "#005A9C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 8,
     marginBottom: 20
+  },
+  backButton: {
+    padding: 10,
+    marginRight: 5,
+    backgroundColor: "#F0F5FA",
+    borderRadius: 15,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#005A9C",
+    marginLeft: 10
   },
 
   filterContainer: {
     flexDirection: "row",
-    marginBottom: 20
+    marginBottom: 20,
+    paddingHorizontal: 15
   },
 
   filterButton: {
     borderWidth: 1,
-    borderColor: "#0A84FF",
-    padding: 10,
-    borderRadius: 8,
-    marginRight: 10
+    borderColor: "#E2E8F0",
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    marginRight: 10,
+    elevation: 2
   },
 
   activeFilter: {
-    backgroundColor: "#0A84FF"
+    backgroundColor: "#005A9C",
+    borderColor: "#005A9C",
+    shadowColor: "#005A9C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5
+  },
+  filterText: {
+    fontWeight: "700",
+    color: "#334155"
   },
 
   ticketCard: {
-    backgroundColor: "#EAF3FF",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    marginHorizontal: 15,
+    borderRadius: 20,
+    marginBottom: 15,
+    shadowColor: "#CBD5E1",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#F1F5F9"
   },
 
   ticketTitle: {
-    fontWeight: "bold",
-    marginBottom: 5
+    fontWeight: "800",
+    fontSize: 16,
+    marginBottom: 8,
+    color: "#1E293B"
   },
 
   status: {
-    marginTop: 5,
-    color: "#0A84FF"
+    marginTop: 10,
+    color: "#005A9C",
+    fontWeight: "bold",
+    backgroundColor: "#E0EFFC",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+    alignSelf: "flex-start",
+    fontSize: 12
   }
 
 });

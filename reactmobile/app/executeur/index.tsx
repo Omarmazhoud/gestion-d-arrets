@@ -33,6 +33,7 @@ export default function HomeExecuteur() {
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
 
   // Récupérer l'ID de l'exécuteur depuis les paramètres de navigation
   const executeurId = params.userId as string;
@@ -40,6 +41,14 @@ export default function HomeExecuteur() {
   useEffect(() => {
     if (executeurId) {
       fetchUserProfile();
+
+      // Heartbeat (Ping) toutes les 45 secondes
+      const pingInterval = setInterval(() => {
+        axios.post(`${BASE_URL}/auth/ping/${executeurId}`)
+          .catch(err => console.log("Ping error", err));
+      }, 45000);
+
+      return () => clearInterval(pingInterval);
     }
   }, [executeurId]);
 
@@ -75,7 +84,7 @@ export default function HomeExecuteur() {
         return "orange";
 
       case "EN_COURS":
-        return "#0A84FF";
+        return "#005A9C";
 
       case "FERMEE":
         return "green";
@@ -91,7 +100,7 @@ export default function HomeExecuteur() {
 
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#0A84FF" />
+        <ActivityIndicator size="large" color="#005A9C" />
       </View>
     );
 
@@ -102,25 +111,26 @@ export default function HomeExecuteur() {
     <View style={styles.container}>
 
       {/* HEADER */}
-
       <View style={styles.header}>
-
-        <TouchableOpacity
-          onPress={() => setMenuVisible(true)}
-        >
-          <Ionicons name="menu" size={26} color="#0A84FF" />
-        </TouchableOpacity>
-
-        <Text style={styles.title}>
-          Bienvenue {userProfile?.nom || "Exécuteur"}
-        </Text>
-
-        <TouchableOpacity
-          onPress={() => router.push("/executeur/notifications")}
-        >
-          <Ionicons name="notifications-outline" size={26} color="#0A84FF" />
-        </TouchableOpacity>
-
+        <View style={styles.headerTop}>
+          <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.iconBtn}>
+            <Ionicons name="menu" size={28} color="#005A9C" />
+          </TouchableOpacity>
+          <View style={styles.titleWrapper}>
+            <Text style={styles.subtitle}>Espace Exécuteur</Text>
+            <Text style={styles.title}>Interventions</Text>
+          </View>
+          <TouchableOpacity onPress={() => router.push("/executeur/notifications")} style={styles.iconBtn}>
+            <View>
+              <Ionicons name="notifications" size={26} color="#005A9C" />
+              {notifCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{notifCount}</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* LISTE TICKETS */}
@@ -174,7 +184,7 @@ export default function HomeExecuteur() {
 
       )}
 
-      {/* MENU */}
+      {/* MENU LATERAL */}
 
       <Modal transparent visible={menuVisible} animationType="fade">
 
@@ -185,8 +195,19 @@ export default function HomeExecuteur() {
 
           <View style={styles.menuBox}>
 
-            {/* HISTORIQUE */}
+            {/* CREER TICKET */}
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); router.push({ pathname: "/executeur/create-ticket", params: { userId: executeurId } }); }}>
+              <Ionicons name="add-circle-outline" size={22} color="#444" style={{marginRight: 10}} />
+              <Text style={styles.menuText}>Déclarer un Ticket</Text>
+            </TouchableOpacity>
 
+            {/* PROFIL */}
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuVisible(false); router.push({ pathname: "/executeur/profil", params: { userId: executeurId } }); }}>
+              <Ionicons name="person-outline" size={22} color="#444" style={{marginRight: 10}} />
+              <Text style={styles.menuText}>Mon Profil</Text>
+            </TouchableOpacity>
+
+            {/* QUALITE VERIF */}
             {userProfile?.typeExecuteur === "qualite" && (
               <TouchableOpacity
                 style={styles.menuItem}
@@ -198,12 +219,14 @@ export default function HomeExecuteur() {
                   });
                 }}
               >
+                <Ionicons name="shield-checkmark-outline" size={22} color="#444" style={{marginRight: 10}} />
                 <Text style={styles.menuText}>
                   Vérification Qualité
                 </Text>
               </TouchableOpacity>
             )}
 
+            {/* MESSAGERIE GROUPEE */}
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {
@@ -214,30 +237,30 @@ export default function HomeExecuteur() {
                 });
               }}
             >
+              <Ionicons name="chatbubbles-outline" size={22} color="#444" style={{marginRight: 10}} />
               <Text style={styles.menuText}>
                 Messagerie Groupée
               </Text>
             </TouchableOpacity>
 
+            {/* HISTORIQUE */}
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {
-
                 setMenuVisible(false);
                 router.push({
                   pathname: "/executeur/historique",
                   params: { userId: executeurId }
                 });
-
               }}
             >
+              <Ionicons name="time-outline" size={22} color="#444" style={{marginRight: 10}} />
               <Text style={styles.menuText}>
                 Historique
               </Text>
             </TouchableOpacity>
 
             {/* LOGOUT */}
-
             <TouchableOpacity
               style={styles.menuItem}
               onPress={async () => {
@@ -253,11 +276,10 @@ export default function HomeExecuteur() {
                 router.replace("/auth/login");
               }}
             >
-
+              <Ionicons name="log-out-outline" size={22} color="red" style={{marginRight: 10}} />
               <Text style={[styles.menuText, { color: "red" }]}>
                 Logout
               </Text>
-
             </TouchableOpacity>
 
           </View>
@@ -276,36 +298,87 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    paddingTop: 50,
-    backgroundColor: "#FFFFFF"
+    paddingTop: 45,
+    backgroundColor: "#F4F7FB"
   },
 
   header: {
+    paddingHorizontal: 20,
+    backgroundColor: "#FFFFFF",
+    paddingBottom: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    shadowColor: "#005A9C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 8,
+    marginBottom: 15
+  },
+
+  headerTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    marginBottom: 20
+  },
+  iconBtn: {
+    backgroundColor: "#F0F5FA",
+    padding: 10,
+    borderRadius: 16,
+  },
+  titleWrapper: {
+    alignItems: "center",
+  },
+  subtitle: {
+    fontSize: 12,
+    color: "#666",
+    textTransform: "uppercase",
+    fontWeight: "bold",
+    letterSpacing: 1
   },
 
   title: {
     fontSize: 22,
-    fontWeight: "bold",
-    color: "#0A84FF"
+    fontWeight: "800",
+    color: "#005A9C"
+  },
+  badge: {
+    position: "absolute",
+    right: -5,
+    top: -5,
+    backgroundColor: "red",
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  badgeText: {
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: "bold"
   },
 
   card: {
-    backgroundColor: "#EAF3FF",
-    padding: 16,
+    backgroundColor: "#FFFFFF",
+    padding: 20,
     marginHorizontal: 15,
     marginBottom: 15,
-    borderRadius: 12
+    borderRadius: 20,
+    shadowColor: "#CBD5E1",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: "#F1F5F9"
   },
 
   cardTitle: {
     fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 6
+    fontWeight: "800",
+    marginBottom: 6,
+    color: "#1E293B"
   },
 
   loader: {
@@ -327,27 +400,38 @@ const styles = StyleSheet.create({
 
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(15, 23, 42, 0.6)",
     justifyContent: "flex-start",
     alignItems: "flex-start"
   },
 
   menuBox: {
-    marginTop: 70,
-    marginLeft: 10,
+    marginTop: 55,
+    marginLeft: 20,
     backgroundColor: "#FFFFFF",
-    padding: 15,
-    borderRadius: 10,
-    width: 180,
-    elevation: 5
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 16,
+    width: 260,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 15,
+    elevation: 10
   },
 
   menuItem: {
-    paddingVertical: 10
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9"
   },
 
   menuText: {
-    fontSize: 16
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#334155"
   }
 
 });

@@ -2,6 +2,7 @@ package com.example.demo.model.entity;
 
 import com.example.demo.model.enums.Role;
 import com.example.demo.model.enums.TypeExecuteur;
+import java.time.LocalDateTime;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -27,10 +28,15 @@ public class Utilisateur {
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean actif = false;
+    
+    @jakarta.persistence.Column(columnDefinition = "boolean default false")
+    private Boolean deleted = false;
+    
     @Enumerated(EnumType.STRING)
     private TypeExecuteur typeExecuteur;
     private String pushToken;
     private boolean isOnline = false;
+    private LocalDateTime derniereActivite;
 
     // ===== Getters & Setters =====
 
@@ -112,5 +118,21 @@ public class Utilisateur {
 
     public void setOnline(boolean online) {
         isOnline = online;
+    }
+
+    public Boolean isDeleted() {
+        return deleted != null ? deleted : false;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public LocalDateTime getDerniereActivite() {
+        return derniereActivite;
+    }
+
+    public void setDerniereActivite(LocalDateTime derniereActivite) {
+        this.derniereActivite = derniereActivite;
     }
 }

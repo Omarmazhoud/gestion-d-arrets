@@ -22,7 +22,8 @@ export const deleteUser = async (id) => {
 };
 // 🔥 AJOUTER ÇA
 export const updateUser = async (id, user) => {
-  return await axios.put(`${API}/${id}`, user);
+  const response = await api.put(`/utilisateurs/${id}`, user);
+  return response.data;
 };
 
 export const getOnlineExecuteurs = async (type) => {

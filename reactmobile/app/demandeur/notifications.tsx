@@ -6,6 +6,8 @@ import {
   TouchableOpacity
 } from "react-native";
 import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 type Notification = {
   id: string;
@@ -15,7 +17,7 @@ type Notification = {
 };
 
 export default function Notifications() {
-
+  const router = useRouter();
   const [filter, setFilter] = useState<"TOUS" | "NON_LU">("TOUS");
 
   // Notifications simulées
@@ -42,7 +44,12 @@ export default function Notifications() {
   return (
     <View style={styles.container}>
 
-      <Text style={styles.title}>Notifications</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#005A9C" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Notifications</Text>
+      </View>
 
       {/* FILTRE */}
       <View style={styles.filters}>
@@ -54,7 +61,7 @@ export default function Notifications() {
           ]}
           onPress={() => setFilter("TOUS")}
         >
-          <Text style={styles.filterText}>Tout</Text>
+          <Text style={[styles.filterText, filter === "TOUS" && {color: "#FFF"}]}>Tout</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -64,7 +71,7 @@ export default function Notifications() {
           ]}
           onPress={() => setFilter("NON_LU")}
         >
-          <Text style={styles.filterText}>Non lues</Text>
+          <Text style={[styles.filterText, filter === "NON_LU" && {color: "#FFF"}]}>Non lues</Text>
         </TouchableOpacity>
 
       </View>
@@ -99,48 +106,88 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#F4F7FB",
+    paddingTop: 45
   },
-
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#0A84FF",
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    backgroundColor: "#FFFFFF",
+    paddingBottom: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    shadowColor: "#005A9C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 8,
     marginBottom: 20
+  },
+  backButton: {
+    padding: 10,
+    marginRight: 5,
+    backgroundColor: "#F0F5FA",
+    borderRadius: 15,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#005A9C",
+    marginLeft: 10
   },
 
   filters: {
     flexDirection: "row",
-    marginBottom: 20
+    marginBottom: 20,
+    paddingHorizontal: 15
   },
 
   filterBtn: {
     borderWidth: 1,
-    borderColor: "#0A84FF",
-    padding: 10,
-    borderRadius: 8,
-    marginRight: 10
+    borderColor: "#E2E8F0",
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    marginRight: 10,
+    elevation: 2
   },
 
   activeFilter: {
-    backgroundColor: "#0A84FF"
+    backgroundColor: "#005A9C",
+    borderColor: "#005A9C",
+    shadowColor: "#005A9C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5
   },
 
   filterText: {
-    color: "#000"
+    fontWeight: "700",
+    color: "#334155"
   },
 
   card: {
-    backgroundColor: "#EAF3FF",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    marginHorizontal: 15,
+    borderRadius: 20,
+    marginBottom: 15,
+    shadowColor: "#CBD5E1",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#F1F5F9"
   },
 
   unread: {
-    borderLeftWidth: 5,
-    borderLeftColor: "red"
+    borderLeftWidth: 6,
+    borderLeftColor: "#FF3B30",
+    backgroundColor: "#FFF5F5"
   },
 
   message: {

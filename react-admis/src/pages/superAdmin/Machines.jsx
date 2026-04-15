@@ -7,8 +7,11 @@ import {
   HiCheckCircle, 
   HiExclamationCircle,
   HiPencil,
-  HiTrash
+  HiTrash,
+  HiQrcode,
+  HiDownload
 } from "react-icons/hi";
+import { QRCodeCanvas } from "qrcode.react";
 
 function Machines() {
 
@@ -20,6 +23,23 @@ function Machines() {
   const [filterSecteur, setFilterSecteur] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [qrData, setQrData] = useState("");
+  const [qrTitle, setQrTitle] = useState("");
+
+  const handleDownloadQr = () => {
+    const canvas = document.getElementById("qr-canvas");
+    if (canvas) {
+      const pngUrl = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+      let downloadLink = document.createElement("a");
+      downloadLink.href = pngUrl;
+      downloadLink.download = `${qrTitle.replace(/\s+/g, '_')}_QR.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+  };
 
   const [form, setForm] = useState({
     codeMachine: "",
@@ -262,6 +282,17 @@ function Machines() {
                       >
                         <HiTrash />
                       </button>
+                      <button
+                        onClick={() => {
+                          setQrData(JSON.stringify({ type: "machine", id: m.id, nom: m.nom }));
+                          setQrTitle(`Machine: ${m.nom}`);
+                          setShowQrModal(true);
+                        }}
+                        style={btnIconStyle("#10b981")}
+                        title="Générer QR Code"
+                      >
+                        <HiQrcode />
+                      </button>
                     </div>
                   ) : (
                     <span style={{ color: "#94a3b8", fontSize: "12px", fontStyle: "italic" }}>Lecture seule</span>
@@ -382,6 +413,39 @@ function Machines() {
                 style={{ flex: 1, background: "#2563eb", color: "white", padding: "12px", border: "none", borderRadius: "10px", fontWeight: "600", cursor: "pointer" }}
               >
                 {editingId ? "Enregistrer" : "Confirmer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL QR CODE */}
+      {showQrModal && (
+        <div style={modalOverlay}>
+          <div style={{...modalContent, width: "350px", textAlign: "center"}}>
+            <h3 style={{ marginBottom: "20px", fontSize: "18px", fontWeight: "700" }}>{qrTitle}</h3>
+            
+            <div style={{ display: "flex", justifyContent: "center", padding: "20px", background: "#f8fafc", borderRadius: "12px", marginBottom: "20px" }}>
+              <QRCodeCanvas 
+                id="qr-canvas"
+                value={qrData} 
+                size={200} 
+                level={"H"}
+              />
+            </div>
+            
+            <div style={{ display: "flex", gap: "12px", flexDirection: "column" }}>
+              <button 
+                onClick={handleDownloadQr} 
+                style={{ background: "#10b981", color: "white", padding: "12px", border: "none", borderRadius: "10px", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+              >
+                <HiDownload size={18} /> Télécharger / Imprimer
+              </button>
+              <button 
+                onClick={() => setShowQrModal(false)}
+                style={{ padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0", background: "white", fontWeight: "600", cursor: "pointer" }}
+              >
+                Fermer
               </button>
             </div>
           </div>

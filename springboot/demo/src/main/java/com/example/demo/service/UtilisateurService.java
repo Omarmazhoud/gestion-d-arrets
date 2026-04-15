@@ -40,7 +40,7 @@ public class UtilisateurService {
     // READ
     // =========================
     public List<Utilisateur> findAll() {
-        return utilisateurRepository.findAll();
+        return utilisateurRepository.findByDeletedFalse();
     }
 
     public List<Utilisateur> getOnlineExecuteurs(com.example.demo.model.enums.TypeExecuteur type) {
@@ -90,10 +90,14 @@ public Utilisateur update(String id, Utilisateur newUser) {
     return utilisateurRepository.save(user);
 }
     // =========================
-    // DELETE
+    // DELETE (Soft delete pour éviter erreur 500 (Foreign Keys Tickets))
     // =========================
     public void delete(String id) {
-        utilisateurRepository.deleteById(id);
+        Utilisateur user = findById(id);
+        user.setDeleted(true);
+        user.setActif(false);
+        user.setEmail(user.getEmail() + "_deleted_" + System.currentTimeMillis());
+        utilisateurRepository.save(user);
     }
 
     public void updatePushToken(String id, String token) {

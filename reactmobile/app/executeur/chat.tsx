@@ -70,6 +70,25 @@ export default function ChatScreen() {
     }
   };
 
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      alert("La permission d'accéder à l'appareil photo est requise.");
+      return;
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
+      allowsEditing: false,
+      quality: 0.5,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const base64Str = "data:image/jpeg;base64," + result.assets[0].base64;
+      setImageBase64(base64Str);
+    }
+  };
+
   return (
     <KeyboardAvoidingView 
       style={styles.container} 
@@ -92,7 +111,7 @@ export default function ChatScreen() {
                 {!!item.image && (
                   <Image 
                     source={{ uri: item.image }} 
-                    style={{ width: 150, height: 150, borderRadius: 8, marginBottom: item.contenu ? 5 : 0 }} 
+                    style={{ width: 150, height: 150, borderRadius: 12, marginBottom: item.contenu ? 5 : 0 }} 
                     resizeMode="cover"
                   />
                 )}
@@ -118,9 +137,14 @@ export default function ChatScreen() {
       )}
 
       <View style={styles.inputContainer}>
-        <TouchableOpacity style={styles.attachButton} onPress={pickImage}>
-          <Ionicons name="image-outline" size={24} color="#6B7280" />
-        </TouchableOpacity>
+        <View style={styles.actionButtons}>
+          <TouchableOpacity style={styles.attachButton} onPress={pickImage}>
+            <Ionicons name="image-outline" size={24} color="#6B7280" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.attachButton} onPress={takePhoto}>
+            <Ionicons name="camera-outline" size={24} color="#6B7280" />
+          </TouchableOpacity>
+        </View>
         <TextInput
           style={styles.input}
           placeholder="Message..."
@@ -147,7 +171,7 @@ const styles = StyleSheet.create({
   msgOther: { alignSelf: "flex-start" },
   senderName: { fontSize: 12, color: "gray", marginBottom: 2, marginLeft: 5 },
   bubble: { padding: 12, borderRadius: 16 },
-  bubbleMe: { backgroundColor: "#0A84FF", borderBottomRightRadius: 4 },
+  bubbleMe: { backgroundColor: "#005A9C", borderBottomRightRadius: 4 },
   bubbleOther: { backgroundColor: "white", borderBottomLeftRadius: 4 },
   timeText: { fontSize: 10, color: "gray", marginTop: 2, alignSelf: "flex-end" },
   inputContainer: { 
@@ -158,6 +182,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: "#E5E7EB"
   },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 8,
+    marginRight: 8
+  },
   input: { 
     flex: 1, 
     backgroundColor: "#F3F4F6", 
@@ -167,7 +196,7 @@ const styles = StyleSheet.create({
     maxHeight: 100
   },
   sendButton: { 
-    backgroundColor: "#0A84FF", 
+    backgroundColor: "#005A9C", 
     width: 45, 
     height: 45, 
     borderRadius: 25, 
@@ -176,11 +205,10 @@ const styles = StyleSheet.create({
     marginLeft: 10
   },
   attachButton: {
-    marginRight: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    width: 35,
-    height: 35,
+    width: 40,
+    height: 40,
     borderRadius: 20,
     backgroundColor: '#F3F4F6'
   },
@@ -195,7 +223,7 @@ const styles = StyleSheet.create({
   previewImage: {
     width: 60,
     height: 60,
-    borderRadius: 8
+    borderRadius: 12
   },
   previewClose: {
     position: "absolute",

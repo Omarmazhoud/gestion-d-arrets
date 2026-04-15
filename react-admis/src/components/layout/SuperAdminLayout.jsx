@@ -26,6 +26,14 @@ export default function SuperAdminLayout() {
       navigate("/");
     } else {
       setUser(storedUser);
+      
+      // Heartbeat (Ping) toutes les 45 secondes
+      const pingInterval = setInterval(() => {
+        fetch(`http://localhost:8080/api/auth/ping/${storedUser.id}`, { method: 'POST' })
+          .catch(err => console.error("Ping error", err));
+      }, 45000);
+
+      return () => clearInterval(pingInterval);
     }
   }, [navigate]);
 

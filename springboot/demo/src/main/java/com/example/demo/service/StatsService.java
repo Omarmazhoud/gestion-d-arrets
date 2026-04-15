@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,7 @@ public class StatsService {
 
     public Map<String, Object> getGlobalStats() {
         Map<String, Object> stats = new HashMap<>();
-        stats.put("totalUsers", utilisateurRepo.count());
+        stats.put("totalUsers", utilisateurRepo.countByDeletedFalse());
         stats.put("totalTickets", ticketRepo.count());
         stats.put("ticketsOuverts", ticketRepo.countByStatut(TicketStatus.OUVERTE));
         stats.put("ticketsEnCours", ticketRepo.countByStatut(TicketStatus.EN_COURS));
@@ -39,14 +40,21 @@ public class StatsService {
                 ticketRepo.countByStatut(TicketStatus.A_VERIFIER_QUALITE) +
                         ticketRepo.countByStatut(TicketStatus.A_VERIFIER_DEMANDEUR));
         stats.put("ticketsFermes", ticketRepo.countByStatut(TicketStatus.FERMEE));
-
-        // Nouveaux stats présence en ligne
-        stats.put("onlineTotal", utilisateurRepo.countByIsOnlineTrue());
-        stats.put("onlineDemandeurs", utilisateurRepo.countByIsOnlineTrueAndRole(Role.DEMANDEUR));
-        stats.put("onlineExecuteurs", utilisateurRepo.countByIsOnlineTrueAndRole(Role.EXECUTEUR));
+        
+        // Nouveaux stats présence en ligne (uniquement ceux actifs dans les dernières 35 minutes et non supprimés)
+        LocalDateTime activeThreshold = LocalDateTime.now().minusMinutes(35);
+        
+        stats.put("onlineTotal", utilisateurRepo.countByIsOnlineTrueAndDeletedFalseAndDerniereActiviteAfter(activeThreshold));
+        
+        stats.put("onlineDemandeurs", utilisateurRepo.countByIsOnlineTrueAndDeletedFalseAndRoleAndDerniereActiviteAfter(
+            Role.DEMANDEUR, activeThreshold));
+            
+        stats.put("onlineExecuteurs", utilisateurRepo.countByIsOnlineTrueAndDeletedFalseAndRoleAndDerniereActiviteAfter(
+            Role.EXECUTEUR, activeThreshold));
+            
         stats.put("onlineAdmins", 
-            utilisateurRepo.countByIsOnlineTrueAndRole(Role.ADMIN) + 
-            utilisateurRepo.countByIsOnlineTrueAndRole(Role.SUPER_ADMIN));
+            utilisateurRepo.countByIsOnlineTrueAndDeletedFalseAndRoleAndDerniereActiviteAfter(Role.ADMIN, activeThreshold) + 
+            utilisateurRepo.countByIsOnlineTrueAndDeletedFalseAndRoleAndDerniereActiviteAfter(Role.SUPER_ADMIN, activeThreshold));
             
         return stats;
     }

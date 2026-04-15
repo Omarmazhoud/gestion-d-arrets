@@ -59,15 +59,18 @@ export default function Secteurs() {
   };
 
   const filtered = secteurs.filter(s => s.nom.toLowerCase().includes(search.toLowerCase()));
-
-  // Role check for read-only
   const user = JSON.parse(localStorage.getItem("user"));
   const isSuperAdmin = user?.role === "SUPER_ADMIN";
 
   return (
-    <div style={{ padding: "40px", background: "#f8fafc", minHeight: "100vh" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>Gestion des Secteurs</h1>
+    <div style={{ padding: "30px", background: "#f1f5f9", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
+      
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+        <div>
+          <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#1e293b", margin: 0 }}>Gestion des Secteurs</h1>
+          <p style={{ color: "#64748b", margin: "5px 0 0 0" }}>Supervisez les différentes zones de l'usine et leurs responsables.</p>
+        </div>
+        
         {isSuperAdmin && (
           <button
             onClick={() => {
@@ -76,87 +79,135 @@ export default function Secteurs() {
               setShowModal(true);
             }}
             style={{
-              background: "#2563eb",
+              background: "linear-gradient(135deg, #0ea5e9, #0284c7)",
               color: "white",
-              padding: "10px 20px",
+              padding: "12px 24px",
               border: "none",
-              borderRadius: "8px",
-              cursor: "pointer"
+              borderRadius: "12px",
+              fontWeight: "600",
+              cursor: "pointer",
+              boxShadow: "0 10px 15px -3px rgba(14, 165, 233, 0.3)",
+              transition: "transform 0.2s"
             }}
           >
-            + Ajouter Secteur
+            + Nouveau Secteur
           </button>
         )}
       </div>
 
-      <div style={{ marginTop: "20px" }}>
+      <div style={{ background: "white", padding: "24px", borderRadius: "16px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", marginBottom: "25px" }}>
         <input
           type="text"
-          placeholder="Rechercher..."
+          placeholder="Rechercher un secteur..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{ padding: "8px 12px", borderRadius: "6px", border: "1px solid #ccc", width: "250px" }}
+          style={{ 
+              width: "300px", 
+              padding: "12px 16px", 
+              borderRadius: "10px", 
+              border: "1px solid #e2e8f0", 
+              outline: "none",
+              fontSize: "14px",
+              background: "#f8fafc"
+          }}
         />
       </div>
 
-      <div style={{ marginTop: "25px", background: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 10px 25px rgba(0,0,0,0.05)" }}>
+      <div style={{ background: "white", borderRadius: "16px", boxShadow: "0 10px 25px rgba(0,0,0,0.05)", overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead style={{ background: "#f1f5f9" }}>
+          <thead style={{ background: "#f8fafc", borderBottom: "2px solid #f1f5f9" }}>
             <tr>
-              <th style={{ padding: "12px", textAlign: "left" }}>Nom du Secteur</th>
-              <th style={{ padding: "12px", textAlign: "left" }}>Chef du Secteur</th>
-              <th style={{ padding: "12px", textAlign: "left" }}>Matricule</th>
-              {isSuperAdmin && <th style={{ padding: "12px", textAlign: "right" }}>Actions</th>}
+              <th style={{ padding: "18px 24px", textAlign: "left", color: "#64748b", fontSize: "12px", fontWeight: "700", textTransform: "uppercase" }}>Nom du Secteur</th>
+              <th style={{ padding: "18px 24px", textAlign: "left", color: "#64748b", fontSize: "12px", fontWeight: "700", textTransform: "uppercase" }}>Responsable (Chef)</th>
+              <th style={{ padding: "18px 24px", textAlign: "left", color: "#64748b", fontSize: "12px", fontWeight: "700", textTransform: "uppercase" }}>Matricule</th>
+              {isSuperAdmin && <th style={{ padding: "18px 24px", textAlign: "right", color: "#64748b", fontSize: "12px", fontWeight: "700", textTransform: "uppercase" }}>Actions</th>}
             </tr>
           </thead>
           <tbody>
             {filtered.map(s => (
-              <tr key={s.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                <td style={{ padding: "12px" }}>{s.nom}</td>
-                <td style={{ padding: "12px" }}>{s.nomChef}</td>
-                <td style={{ padding: "12px" }}>{s.matricule}</td>
+              <tr key={s.id} style={{ borderBottom: "1px solid #f1f5f9", transition: "background 0.2s" }}>
+                <td style={{ padding: "16px 24px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#0ea5e9" }}></div>
+                    <span style={{ fontWeight: "700", color: "#0f172a" }}>{s.nom}</span>
+                  </div>
+                </td>
+                <td style={{ padding: "16px 24px", color: "#475569", fontWeight: "500" }}>{s.nomChef || "Non défini"}</td>
+                <td style={{ padding: "16px 24px", color: "#64748b", fontFamily: "monospace", fontSize: "14px" }}>{s.matricule || "-"}</td>
                 {isSuperAdmin && (
-                  <td style={{ padding: "12px", textAlign: "right" }}>
-                    <button onClick={() => handleOpenEdit(s)} style={{ background: "#2563eb", color: "white", border: "none", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", marginRight: "10px" }}>
-                      Modifier
-                    </button>
-                    <button onClick={() => handleDelete(s.id)} style={{ background: "#ef4444", color: "white", border: "none", padding: "6px 12px", borderRadius: "6px", cursor: "pointer" }}>
-                      Supprimer
-                    </button>
+                  <td style={{ padding: "16px 24px", textAlign: "right" }}>
+                    <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                        <button 
+                            onClick={() => handleOpenEdit(s)} 
+                            style={{ background: "#f1f5f9", color: "#0284c7", border: "none", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: "600", fontSize: "13px" }}
+                        >
+                            Modifier
+                        </button>
+                        <button 
+                            onClick={() => handleDelete(s.id)} 
+                            style={{ background: "#fef2f2", color: "#ef4444", border: "none", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: "600", fontSize: "13px" }}
+                        >
+                            Supprimer
+                        </button>
+                    </div>
                   </td>
                 )}
               </tr>
             ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={isSuperAdmin ? 4 : 3} style={{ padding: "20px", textAlign: "center" }}>
-                  Aucun secteur trouvé
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
 
       {showModal && isSuperAdmin && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", justifyContent: "center", alignItems: "center" }}>
-          <div style={{ background: "white", padding: "30px", borderRadius: "12px", width: "400px" }}>
-            <h3>{editingId ? "Modifier Secteur" : "Ajouter Secteur"}</h3>
-            <div style={{ marginBottom: "15px", marginTop: "15px" }}>
-              <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "5px" }}>Nom *</label>
-              <input name="nom" value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }} />
-            </div>
-            <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "5px" }}>Chef du Secteur</label>
-              <input name="nomChef" value={form.nomChef} onChange={(e) => setForm({ ...form, nomChef: e.target.value })} style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }} />
-            </div>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 2000, backdropFilter: "blur(4px)" }}>
+          <div style={{ background: "white", padding: "35px", borderRadius: "24px", width: "450px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)" }}>
+            <h3 style={{ margin: 0, fontSize: "22px", fontWeight: "800", color: "#0f172a" }}>{editingId ? "Modifier le Secteur" : "Nouveau Secteur"}</h3>
+            <p style={{ color: "#64748b", fontSize: "14px", marginTop: "5px", marginBottom: "30px" }}>Veuillez configurer la zone de production.</p>
+            
             <div style={{ marginBottom: "20px" }}>
-              <label style={{ display: "block", fontSize: "12px", color: "#666", marginBottom: "5px" }}>Matricule</label>
-              <input name="matricule" value={form.matricule} onChange={(e) => setForm({ ...form, matricule: e.target.value })} style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }} />
+              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#475569", marginBottom: "8px", textTransform: "uppercase" }}>Désignation du Secteur *</label>
+              <input 
+                name="nom" 
+                value={form.nom} 
+                onChange={(e) => setForm({ ...form, nom: e.target.value })} 
+                placeholder="Ex: Section B1"
+                style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0", outline: "none", fontSize: "15px" }} 
+              />
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <button onClick={() => setShowModal(false)} style={{ padding: "8px 15px", border: "1px solid #ccc", borderRadius: "6px", background: "white", cursor: "pointer" }}>Annuler</button>
-              <button onClick={handleSave} style={{ background: "#2563eb", color: "white", padding: "8px 15px", border: "none", borderRadius: "6px", cursor: "pointer" }}>Sauvegarder</button>
+
+            <div style={{ marginBottom: "20px" }}>
+              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#475569", marginBottom: "8px", textTransform: "uppercase" }}>Responsable (Chef)</label>
+              <input 
+                name="nomChef" 
+                value={form.nomChef} 
+                onChange={(e) => setForm({ ...form, nomChef: e.target.value })} 
+                placeholder="Nom du responsable..."
+                style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0", outline: "none", fontSize: "15px" }} 
+              />
+            </div>
+
+            <div style={{ marginBottom: "30px" }}>
+              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#475569", marginBottom: "8px", textTransform: "uppercase" }}>Matricule Responsable</label>
+              <input 
+                name="matricule" 
+                value={form.matricule} 
+                onChange={(e) => setForm({ ...form, matricule: e.target.value })} 
+                placeholder="Code matricule..."
+                style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0", outline: "none", fontSize: "15px" }} 
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: "15px" }}>
+              <button 
+                onClick={() => setShowModal(false)} 
+                style={{ flex: 1, padding: "12px", border: "1px solid #e2e8f0", borderRadius: "12px", background: "white", cursor: "pointer", fontWeight: "600", color: "#64748b" }}>
+                Annuler
+              </button>
+              <button 
+                onClick={handleSave} 
+                style={{ flex: 1, background: "#0ea5e9", color: "white", padding: "12px", border: "none", borderRadius: "12px", cursor: "pointer", fontWeight: "600", boxShadow: "0 4px 6px rgba(14,165,233,0.2)" }}>
+                Enregistrer
+              </button>
             </div>
           </div>
         </div>

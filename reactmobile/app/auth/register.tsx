@@ -5,7 +5,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Alert
+  Alert,
+  Image
 } from "react-native";
 import { useState } from "react";
 import axios from "axios";
@@ -73,10 +74,18 @@ export default function Register() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.logoContainer}>
+        <Image 
+          source={require('../../assets/images/icon.png')} 
+          style={styles.logo} 
+          resizeMode="contain" 
+        />
+      </View>
 
-      <Text style={styles.title}>Créer un compte</Text>
+      <View style={styles.formBox}>
+        <Text style={styles.title}>Créer un compte</Text>
 
-      <TextInput
+        <TextInput
         placeholder="Nom"
         style={styles.input}
         value={nom}
@@ -106,7 +115,7 @@ export default function Register() {
           onChangeText={setPassword}
         />
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-          <Ionicons name={showPassword ? "eye-off" : "eye"} size={24} color="#0A84FF" />
+          <Ionicons name={showPassword ? "eye-off" : "eye"} size={24} color="#005A9C" />
         </TouchableOpacity>
       </View>
 
@@ -124,7 +133,7 @@ export default function Register() {
             setTypeExecuteur("");
           }}
         >
-          <Text style={styles.roleText}>Demandeur</Text>
+          <Text style={[styles.roleText, role === "DEMANDEUR" && {color: "#FFF"}]}>Demandeur</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -134,7 +143,7 @@ export default function Register() {
           ]}
           onPress={() => setRole("EXECUTEUR")}
         >
-          <Text style={styles.roleText}>Exécuteur</Text>
+          <Text style={[styles.roleText, role === "EXECUTEUR" && {color: "#FFF"}]}>Exécuteur</Text>
         </TouchableOpacity>
       </View>
 
@@ -162,13 +171,13 @@ export default function Register() {
         </>
       )}
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleRegister}
-      >
-        <Text style={styles.buttonText}>S'inscrire</Text>
-      </TouchableOpacity>
-
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleRegister}
+        >
+          <Text style={styles.buttonText}>S'inscrire</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -178,27 +187,53 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     justifyContent: "center",
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#F4F7FB"
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 30,
+    marginTop: 30
+  },
+  logo: {
+    width: 280,
+    height: 100
+  },
+  formBox: {
+    backgroundColor: "#FFFFFF",
+    padding: 25,
+    borderRadius: 25,
+    shadowColor: "#CBD5E1",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+    marginBottom: 40
   },
   title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#0A84FF",
+    fontSize: 28,
+    fontWeight: "900",
+    color: "#005A9C",
     textAlign: "center",
-    marginBottom: 25
+    marginBottom: 30
   },
   subtitle: {
-    fontWeight: "bold",
+    fontWeight: "800",
+    color: "#1E293B",
     marginBottom: 10,
-    marginTop: 10
+    marginTop: 15,
+    fontSize: 16
   },
   input: {
     borderWidth: 1,
-    borderColor: "#0A84FF",
-    backgroundColor: "#EAF3FF",
-    padding: 14,
-    borderRadius: 10,
-    marginBottom: 15
+    borderColor: "#E2E8F0",
+    backgroundColor: "#F4F7FB",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 15,
+    fontSize: 16,
+    color: "#334155"
   },
   roleContainer: {
     flexDirection: "row",
@@ -208,54 +243,71 @@ const styles = StyleSheet.create({
   roleButton: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#0A84FF",
-    padding: 12,
-    borderRadius: 8,
+    borderColor: "#E2E8F0",
+    backgroundColor: "#F4F7FB",
+    padding: 15,
+    borderRadius: 16,
     alignItems: "center",
     marginHorizontal: 5
   },
   activeRole: {
-    backgroundColor: "#0A84FF"
+    backgroundColor: "#005A9C",
+    borderColor: "#005A9C",
+    shadowColor: "#005A9C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8
   },
   roleText: {
-    color: "#000"
+    color: "#334155",
+    fontWeight: "700"
   },
   typeItem: {
     borderWidth: 1,
-    borderColor: "#0A84FF",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8
+    borderColor: "#E2E8F0",
+    backgroundColor: "#F4F7FB",
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 10
   },
   activeType: {
-    backgroundColor: "#0A84FF"
+    backgroundColor: "#005A9C",
+    borderColor: "#005A9C",
   },
   button: {
-    backgroundColor: "#0A84FF",
-    padding: 16,
-    borderRadius: 10,
+    backgroundColor: "#005A9C",
+    padding: 18,
+    borderRadius: 16,
     alignItems: "center",
-    marginTop: 15
+    marginTop: 25,
+    shadowColor: "#005A9C",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8
   },
   buttonText: {
     color: "#FFFFFF",
-    fontWeight: "bold",
+    fontWeight: "800",
     fontSize: 16
   },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#0A84FF",
-    borderRadius: 10,
-    backgroundColor: "#EAF3FF",
+    borderColor: "#E2E8F0",
+    borderRadius: 16,
+    backgroundColor: "#F4F7FB",
     marginBottom: 15,
   },
   passwordInput: {
     flex: 1,
-    padding: 14,
+    padding: 16,
+    fontSize: 16,
+    color: "#334155"
   },
   eyeIcon: {
-    padding: 10,
+    padding: 15,
   }
 });

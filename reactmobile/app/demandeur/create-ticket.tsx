@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import * as ImagePicker from 'expo-image-picker';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import axios from "axios";
 import { useLocalSearchParams } from "expo-router";
 import { BASE_URL } from "@/constants/api";
@@ -28,6 +29,7 @@ const TYPE_EXECUTEUR_LIST = [
 const TYPE_POSTE_LIST = [
   "MACHINE",
   "matiere",
+  
   "qualitee"
 ];
 
@@ -83,6 +85,8 @@ export default function CreateTicket() {
   const [machineSearch, setMachineSearch] = useState("");
   const [secteursList, setSecteursList] = useState<{id: string, nom: string}[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [scanningQr, setScanningQr] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
 
   useEffect(() => {
     // Fetch Machines
@@ -101,6 +105,43 @@ export default function CreateTicket() {
   const filteredMachines = machines.filter(m =>
     m.nom.toLowerCase().includes(machineSearch.toLowerCase())
   );
+
+  const startQrScan = async () => {
+    if (!permission?.granted) {
+      const res = await requestPermission();
+      if (!res.granted) {
+        Alert.alert("Permission", "Permission d'utiliser la caméra requise pour scanner un code barre.");
+        return;
+      }
+    }
+    setScanningQr(true);
+  };
+
+  const handleBarcodeScanned = ({ type, data }: any) => {
+    setScanningQr(false);
+    try {
+      const parsedData = JSON.parse(data);
+      if (parsedData.type === 'machine' && parsedData.id) {
+        // Find the machine
+        const foundMachine = machines.find(m => m.id === parsedData.id);
+        if (foundMachine) {
+          if (foundMachine.enArret) {
+            Alert.alert("Interdit", "Cette machine est déjà signalée en panne (en arrêt). Vous ne pouvez pas créer un autre ticket pour celle-ci.");
+            return;
+          }
+          setSelectedMachine(foundMachine);
+          setSecteurType(foundMachine.secteur);
+          Alert.alert("Succès", `Machine ${foundMachine.nom} sélectionnée avec succès !`);
+        } else {
+          Alert.alert("Erreur", "Cette machine n'est pas dans la base ou est introuvable.");
+        }
+      } else {
+        Alert.alert("Erreur", "Format de code QR non reconnu pour une machine.");
+      }
+    } catch (e) {
+      Alert.alert("Erreur", "Veuillez scanner un QR Code valide du système.");
+    }
+  };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -222,6 +263,27 @@ export default function CreateTicket() {
   };
 
   return (
+    <View style={{ flex: 1 }}>
+      {scanningQr ? (
+        <View style={{ flex: 1 }}>
+          <CameraView
+            style={StyleSheet.absoluteFillObject}
+            facing="back"
+            onBarcodeScanned={handleBarcodeScanned}
+            barcodeScannerSettings={{
+              barcodeTypes: ["qr"],
+            }}
+          />
+          <View style={{ position: 'absolute', bottom: 50, left: 0, right: 0, alignItems: 'center' }}>
+            <TouchableOpacity 
+              style={{ backgroundColor: 'red', padding: 15, borderRadius: 12 }}
+              onPress={() => setScanningQr(false)}
+            >
+              <Text style={{ color: 'white', fontWeight: 'bold' }}>Annuler</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>BON DE TRAVAIL</Text>
 
@@ -295,6 +357,13 @@ export default function CreateTicket() {
         <View style={styles.machineSection}>
           <Text style={styles.label}>Sélectionnez la Machine</Text>
 
+          <TouchableOpacity 
+            style={[styles.submitButton, { backgroundColor: '#10b981', marginTop: 10, marginBottom: 15, padding: 12 }]} 
+            onPress={startQrScan}
+          >
+            <Text style={styles.submitText}>📷 SCANNER QR CODE MACHINE</Text>
+          </TouchableOpacity>
+
           {selectedMachine ? (
             <View style={styles.selectedMachineCard}>
               <View>
@@ -302,7 +371,7 @@ export default function CreateTicket() {
                 <Text style={styles.selectedMachineSub}>Secteur: {selectedMachine.secteur} | Process: {selectedMachine.process}</Text>
               </View>
               <TouchableOpacity onPress={() => setSelectedMachine(null)} style={styles.changeButton}>
-                <Text style={{ color: "#0A84FF", fontWeight: "bold" }}>Changer</Text>
+                <Text style={{ color: "#005A9C", fontWeight: "bold" }}>Changer</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -323,15 +392,29 @@ export default function CreateTicket() {
                   {filteredMachines.map((item: Machine) => (
                     <TouchableOpacity
                       key={item.id}
-                      style={styles.machineItem}
+                      style={[
+                        styles.machineItem,
+                        item.enArret && { backgroundColor: "#ffebee", borderLeftWidth: 4, borderLeftColor: "#f44336" }
+                      ]}
                       onPress={() => {
+                        if (item.enArret) {
+                          Alert.alert("Machine en panne", "Cette machine est déjà signalée en arrêt dans le système.");
+                          return;
+                        }
                         setSelectedMachine(item);
                         setSecteurType(item.secteur);
                       }}
                     >
-                      <View>
-                        <Text style={styles.machineItemText}>{item.nom}</Text>
-                        <Text style={styles.machineItemSub}>{item.secteur} - {item.process}</Text>
+                      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                        <View>
+                          <Text style={[styles.machineItemText, item.enArret && { color: "#c62828", textDecorationLine: "line-through" }]}>{item.nom}</Text>
+                          <Text style={styles.machineItemSub}>{item.secteur} - {item.process}</Text>
+                        </View>
+                        {item.enArret && (
+                          <View style={{ backgroundColor: "#f44336", paddingHorizontal: 6, paddingVertical: 3, borderRadius: 4 }}>
+                            <Text style={{ color: "white", fontSize: 10, fontWeight: "bold" }}>EN ARRÊT</Text>
+                          </View>
+                        )}
                       </View>
                     </TouchableOpacity>
                   ))}
@@ -396,14 +479,14 @@ export default function CreateTicket() {
       </View>
       
       {isAnalyzing && (
-        <Text style={{textAlign: 'center', color: '#0A84FF', fontWeight: 'bold', marginBottom: 10}}>
+        <Text style={{textAlign: 'center', color: '#005A9C', fontWeight: 'bold', marginBottom: 10}}>
           🤖 L'IA analyse votre photo, veuillez patienter...
         </Text>
       )}
 
       {imagePanne && (
         <View style={{ alignItems: "center", marginBottom: 15 }}>
-          <Image source={{ uri: imagePanne }} style={{ width: "100%", height: 200, borderRadius: 10 }} resizeMode="cover" />
+          <Image source={{ uri: imagePanne }} style={{ width: "100%", height: 200, borderRadius: 12 }} resizeMode="cover" />
           <TouchableOpacity onPress={() => setImagePanne(null)} style={{marginTop: 5}}>
             <Text style={{color: "red", fontWeight: "bold"}}>Supprimer la photo</Text>
           </TouchableOpacity>
@@ -423,6 +506,8 @@ export default function CreateTicket() {
         <Text style={styles.submitText}>Envoyer</Text>
       </TouchableOpacity>
     </ScrollView>
+      )}
+    </View>
   );
 }
 
@@ -435,16 +520,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#0A84FF",
+    color: "#005A9C",
     marginBottom: 20,
     textAlign: "center"
   },
   input: {
     borderWidth: 1,
-    borderColor: "#0A84FF",
-    backgroundColor: "#EAF3FF",
+    borderColor: "#005A9C",
+    backgroundColor: "#F4F7FB",
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 15
   },
   label: {
@@ -454,13 +539,13 @@ const styles = StyleSheet.create({
   },
   selectButton: {
     borderWidth: 1,
-    borderColor: "#0A84FF",
+    borderColor: "#005A9C",
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 10
   },
   activeButton: {
-    backgroundColor: "#0A84FF"
+    backgroundColor: "#005A9C"
   },
   machineItem: {
     padding: 10,
@@ -468,9 +553,9 @@ const styles = StyleSheet.create({
     borderColor: "#ddd"
   },
   submitButton: {
-    backgroundColor: "#0A84FF",
+    backgroundColor: "#005A9C",
     padding: 16,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: "center",
     marginTop: 20
   },
@@ -479,9 +564,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold"
   },
   imageButton: {
-    backgroundColor: "#0A84FF",
+    backgroundColor: "#005A9C",
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 12,
     width: "45%",
     alignItems: "center"
   },
@@ -490,14 +575,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#0A84FF",
+    borderColor: "#005A9C",
     backgroundColor: "white",
   },
   activeTypeButton: {
-    backgroundColor: "#0A84FF",
+    backgroundColor: "#005A9C",
   },
   typeButtonText: {
-    color: "#0A84FF",
+    color: "#005A9C",
     fontSize: 12,
     fontWeight: "bold",
   },
@@ -513,15 +598,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F0F8FF",
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#0A84FF",
+    borderColor: "#005A9C",
     marginBottom: 15,
   },
   selectedMachineName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0A84FF",
+    color: "#005A9C",
   },
   selectedMachineSub: {
     fontSize: 14,
@@ -540,7 +625,7 @@ const styles = StyleSheet.create({
     maxHeight: 200,
     borderWidth: 1,
     borderColor: "#ddd",
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 15,
   },
   machineItemText: {
@@ -552,7 +637,7 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   selectedMachineItem: {
-    backgroundColor: "#EAF3FF",
+    backgroundColor: "#F4F7FB",
   },
   checkIcon: {
     fontSize: 18,

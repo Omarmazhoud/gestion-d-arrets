@@ -38,20 +38,21 @@ public class ProcessService {
         String oldName = process.getNom();
         String newName = newProcess.getNom();
         
+        // Mise à jour des champs de base
+        process.setDescription(newProcess.getDescription());
+        process.setImage(newProcess.getImage());
+
         if (!oldName.equals(newName)) {
             if (processRepository.existsByNom(newName)) {
                 throw new RuntimeException("Process name already exists");
             }
             process.setNom(newName);
-            process = processRepository.save(process);
             
             // Cascade update to other tables using JdbcTemplate
             jdbcTemplate.update("UPDATE machine SET process = ? WHERE process = ?", newName, oldName);
-            // Add similar updates to poste / ticket_panne if they store process
-            // (Assuming only Machine uses process currently based on previous inspection)
         }
         
-        return process;
+        return processRepository.save(process);
     }
 
     @Transactional
