@@ -29,7 +29,7 @@ export default function SuperAdminLayout() {
 
       // Heartbeat (Ping) toutes les 45 secondes
       const pingInterval = setInterval(() => {
-        fetch(`http://192.168.0.100:8080/api/auth/ping/${storedUser.id}`, { method: 'POST' })
+        fetch(`https://l-dtm-leoni.onrender.com/api/auth/ping/${storedUser.id}`, { method: 'POST' })
           .catch(err => console.error("Ping error", err));
       }, 45000);
 
@@ -40,7 +40,7 @@ export default function SuperAdminLayout() {
   const logout = async () => {
     if (user && user.id) {
       try {
-        await fetch(`http://192.168.0.100:8080/api/auth/logout/${user.id}`, { method: 'POST' });
+        await fetch(`https://l-dtm-leoni.onrender.com/api/auth/logout/${user.id}`, { method: 'POST' });
       } catch (error) {
         console.error("Logout error:", error);
       }
