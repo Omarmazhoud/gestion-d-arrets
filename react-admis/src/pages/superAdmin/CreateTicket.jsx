@@ -125,14 +125,13 @@ export default function CreateTicket() {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = async () => {
-        const base64Image = reader.result;
-        const PYTHON_URL = "https://leoni-ia.onrender.com"; // Votre IA sur Render
+        const PYTHON_URL = "https://leoni-ia.onrender.com";
         
         // 1. Prédire le type d'arrêt via la photo
         const responseCv = await fetch(`${PYTHON_URL}/predict-panne-image`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: base64Image })
+          body: JSON.stringify({ image: reader.result })
         });
         const dataCv = await responseCv.json();
 
