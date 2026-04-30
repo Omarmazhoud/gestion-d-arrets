@@ -19,21 +19,31 @@ except:
 
 # Charger le modèle Computer Vision
 try:
+    import tensorflow as tf
     from tensorflow.keras.models import load_model
     from tensorflow.keras.preprocessing.image import img_to_array
     from PIL import Image
     import io
     import base64
     import numpy as np
+    import pickle
 
-    model_cv = load_model("modele_panne_cv.h5")
+    # Désactiver les logs inutiles de TF pour économiser de la RAM
+    import os
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+    # Charger le modèle sans compilation (règle les erreurs de BatchNormalization)
+    model_cv = load_model("modele_panne_cv.h5", compile=False)
+    
     with open("labels_cv.pkl", "rb") as f:
-        import pickle
         labels_cv = pickle.load(f)
+        
     has_cv_model = True
-    print("✅ Modèle Computer Vision chargé avec succès.")
+    print("✅ Modèle Computer Vision chargé avec succès (mode optimisé).")
 except Exception as e:
-    print(f"⚠️ Modèle Computer Vision ou TensorFlow non trouvé : {e}")
+    import traceback
+    print(f"❌ ERREUR CRITIQUE CHARGEMENT IA : {str(e)}")
+    traceback.print_exc()
     has_cv_model = False
 
 # API prédiction exécuteur
