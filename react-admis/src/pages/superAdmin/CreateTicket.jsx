@@ -125,7 +125,8 @@ export default function CreateTicket() {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = async () => {
-        const PYTHON_URL = "http://172.20.10.2:5000"; // Même IP que votre API Spring Boot
+        const base64Image = reader.result;
+        const PYTHON_URL = "https://leoni-ia.onrender.com"; // Votre IA sur Render
         
         // 1. Prédire le type d'arrêt via la photo
         const responseCv = await fetch(`${PYTHON_URL}/predict-panne-image`, {

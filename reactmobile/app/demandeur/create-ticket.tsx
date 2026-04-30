@@ -189,7 +189,7 @@ export default function CreateTicket() {
     try {
       setIsAnalyzing(true);
       // Extraire l'IP pour interroger Flask (port 5000)
-      const PYTHON_API_URL = BASE_URL.replace("8080/api", "5000") + "/predict-panne-image";
+      const PYTHON_API_URL = "https://leoni-ia.onrender.com/predict-panne-image";
       
       const response = await axios.post(PYTHON_API_URL, {
         image: base64Img
