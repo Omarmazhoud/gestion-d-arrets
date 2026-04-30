@@ -134,7 +134,7 @@ export default function Fournisseurs() {
             {filtered.map(f => (
               <tr key={f.id} style={{ borderBottom: "1px solid #f1f5f9", transition: "background 0.2s" }}>
                 <td style={{ padding: "16px 24px" }}>
-                  <div style={{ fontWeight: "700", color: "#0f172a", fontSize: "15px" }}>{f.nom}</div>
+                  <div style={{ fontWeight: "700", color: "var(--primary-bg)", fontSize: "15px" }}>{f.nom}</div>
                   <div style={{ fontSize: "12px", color: "#94a3b8" }}>{f.adresse || "Pas d'adresse"}</div>
                 </td>
                 <td style={{ padding: "16px 24px", color: "#475569", fontWeight: "600" }}>{f.numeroTelephone || "-"}</td>
@@ -169,7 +169,7 @@ export default function Fournisseurs() {
       {showModal && isSuperAdmin && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 2000, backdropFilter: "blur(4px)" }}>
           <div style={{ background: "white", padding: "35px", borderRadius: "24px", width: "500px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)" }}>
-            <h3 style={{ margin: 0, fontSize: "22px", fontWeight: "800", color: "#0f172a" }}>{editingId ? "Modifier Fournisseur" : "Nouveau Fournisseur"}</h3>
+            <h3 style={{ margin: 0, fontSize: "22px", fontWeight: "800", color: "var(--primary-bg)" }}>{editingId ? "Modifier Fournisseur" : "Nouveau Fournisseur"}</h3>
             <p style={{ color: "#64748b", fontSize: "14px", marginTop: "5px", marginBottom: "30px" }}>Détails de contact du partenaire.</p>
             
             <div className="row g-3">

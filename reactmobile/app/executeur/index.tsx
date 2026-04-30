@@ -10,10 +10,10 @@ import {
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 
 import { BASE_URL } from "@/constants/api";
 
@@ -21,6 +21,7 @@ type Ticket = {
   id: string;
   typePanne: string;
   statut: string;
+  priorite?: string;
   executeur: any;
 };
 
@@ -38,10 +39,17 @@ export default function HomeExecuteur() {
   // Récupérer l'ID de l'exécuteur depuis les paramètres de navigation
   const executeurId = params.userId as string;
 
+  useFocusEffect(
+    useCallback(() => {
+      if (executeurId) {
+        setLoading(true);
+        fetchUserProfile();
+      }
+    }, [executeurId])
+  );
+
   useEffect(() => {
     if (executeurId) {
-      fetchUserProfile();
-
       // Heartbeat (Ping) toutes les 45 secondes
       const pingInterval = setInterval(() => {
         axios.post(`${BASE_URL}/auth/ping/${executeurId}`)
@@ -94,6 +102,13 @@ export default function HomeExecuteur() {
 
     }
 
+  };
+
+  const getPriorityColor = (priorite?: string) => {
+    if (priorite === "HAUTE") return "#ef4444";
+    if (priorite === "MOYENNE") return "#f59e0b";
+    if (priorite === "BASSE") return "#10b981";
+    return "#e2e8f0"; // Par défaut
   };
 
   if (loading) {
@@ -152,7 +167,11 @@ export default function HomeExecuteur() {
           renderItem={({ item }) => (
 
             <TouchableOpacity
-              style={[styles.card, item.executeur && item.executeur.id === executeurId ? { borderLeftWidth: 6, borderLeftColor: "#ff9500" } : null]}
+              style={[
+                styles.card, 
+                { borderTopWidth: 6, borderTopColor: getPriorityColor(item.priorite) },
+                item.executeur && item.executeur.id === executeurId ? { borderLeftWidth: 6, borderLeftColor: "#ff9500" } : null
+              ]}
 
               onPress={() =>
                 router.push({
@@ -169,11 +188,18 @@ export default function HomeExecuteur() {
                 <Text style={{ color: "#ff9500", fontWeight: "bold", fontSize: 13, marginBottom: 6 }}>🎯 Ticket Direct</Text>
               )}
 
-              <Text style={styles.cardTitle}>
-                {item.typePanne}
-              </Text>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                <Text style={[styles.cardTitle, { flex: 1 }]}>
+                  {item.typePanne}
+                </Text>
+                {item.priorite && (
+                  <View style={{ backgroundColor: getPriorityColor(item.priorite) + '20', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, marginLeft: 10 }}>
+                    <Text style={{ color: getPriorityColor(item.priorite), fontSize: 10, fontWeight: "bold" }}>{item.priorite}</Text>
+                  </View>
+                )}
+              </View>
 
-              <Text style={{ color: getStatusColor(item.statut) }}>
+              <Text style={{ color: getStatusColor(item.statut), fontWeight: "600" }}>
                 {item.statut}
               </Text>
 

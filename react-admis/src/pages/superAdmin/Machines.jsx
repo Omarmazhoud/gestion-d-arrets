@@ -141,8 +141,8 @@ function Machines() {
       {/* HEADER */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <div>
-           <h1 style={{ fontSize: "24px", fontWeight: "800", color: "#0f172a", margin: 0 }}>Gestion des Machines</h1>
-           <p style={{ color: "#64748b", fontSize: "14px", margin: "4px 0 0 0" }}>Pilotez le parc machines de l'usine LEONI.</p>
+           <h1 style={{ fontSize: "24px", fontWeight: "800", color: "var(--primary-bg)", margin: 0 }}>Gestion des Machines</h1>
+           <p style={{ color: "#64748b", fontSize: "14px", margin: "4px 0 0 0" }}>Pilotez le parc machines de l'usine L-DTM.</p>
         </div>
 
         {isSuperAdmin && (
@@ -160,7 +160,7 @@ function Machines() {
             setShowModal(true);
           }}
           style={{
-            background: "#2563eb",
+            background: "var(--primary-bg)",
             color: "white",
             padding: "10px 20px",
             border: "none",
@@ -410,7 +410,7 @@ function Machines() {
               </button>
               <button 
                 onClick={handleSave} 
-                style={{ flex: 1, background: "#2563eb", color: "white", padding: "12px", border: "none", borderRadius: "10px", fontWeight: "600", cursor: "pointer" }}
+                style={{ flex: 1, background: "var(--primary-bg)", color: "white", padding: "12px", border: "none", borderRadius: "10px", fontWeight: "600", cursor: "pointer" }}
               >
                 {editingId ? "Enregistrer" : "Confirmer"}
               </button>

@@ -48,6 +48,15 @@ function Tickets() {
     }
   };
 
+  const getPriorityBadge = (priorite) => {
+    switch (priorite) {
+      case "HAUTE": return "bg-danger";
+      case "MOYENNE": return "bg-warning text-dark";
+      case "BASSE": return "bg-success";
+      default: return "bg-secondary";
+    }
+  };
+
   return (
     <div className="container mt-4">
       <h2 className="fw-bold mb-4">Suivi des Tickets</h2>
@@ -89,8 +98,9 @@ function Tickets() {
               <tr>
                 <th>ID</th>
                 <th>Description</th>
+                <th>Priorité</th>
                 <th>Statut</th>
-                <th>Machine</th>
+                <th>Poste</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -100,11 +110,23 @@ function Tickets() {
                   <td>{ticket.id.substring(0, 8)}</td>
                   <td>{ticket.description}</td>
                   <td>
+                    {ticket.priorite && (
+                      <span className={`badge ${getPriorityBadge(ticket.priorite)}`}>
+                        {ticket.priorite}
+                      </span>
+                    )}
+                  </td>
+                  <td>
                     <span className={`badge ${getBadgeClass(ticket.statut)}`}>
                       {ticket.statut}
                     </span>
                   </td>
-                  <td>{ticket.machine?.nom || "N/A"}</td>
+                  <td>
+                    {ticket.typePoste === "MACHINE" 
+                      ? `Machine: ${ticket.machine?.nom || "Non spécifié"}`
+                      : (ticket.typePoste || "Non spécifié")
+                    }
+                  </td>
                   <td>
                     <button 
                       className="btn btn-sm btn-outline-primary"

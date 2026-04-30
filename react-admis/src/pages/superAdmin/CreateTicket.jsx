@@ -5,8 +5,7 @@ import { getMachines } from "../../services/machineService";
 import { getSecteurs } from "../../services/secteurService";
 
 const TYPE_EXECUTEUR_LIST = [
-  "maintenance", "informatique", "qualite",
-  "logistique", "process", "batiment", "production", "autre"
+  "maintenance", "informatique", "qualite", "logistique", "process", "batiment", "production", "autre"
 ];
 
 const TYPE_PANNE_LIST = [
@@ -23,60 +22,48 @@ const TYPE_PANNE_LIST = [
   "porte", "fenetre", "electricite_batiment", "fuite_eau", "autre"
 ];
 
-const TYPE_POSTE_LIST = ["MACHINE", "matiere", "qualitee"];
+const TYPE_POSTE_LIST = ["MACHINE", "MATIERE", "QUALITEE"];
 
 export default function CreateTicket() {
   const user = JSON.parse(localStorage.getItem("user"));
 
   const [machines, setMachines] = useState([]);
   const [secteursList, setSecteursList] = useState([]);
-  const [machineSearch, setMachineSearch] = useState("");
   const [selectedMachine, setSelectedMachine] = useState(null);
+  const [selectedMachineTop, setSelectedMachineTop] = useState(null);
 
   const [form, setForm] = useState({
     segment: "",
     equipement: "",
     numeroSerie: "",
     equipementArret: false,
-    dateArret: "",
-    heureArret: "",
     remarque: "",
     typePanne: "",
     description: "",
-    typePoste: "",
+    typePoste: "MACHINE",
     secteurType: "",
-    typeExecuteur: "",
+    typeExecuteur: "maintenance",
   });
 
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [selectedExecuteurId, setSelectedExecuteurId] = useState("");
 
   useEffect(() => {
     getMachines().then(res => setMachines(res.data)).catch(console.error);
     getSecteurs().then(res => setSecteursList(res.data)).catch(console.error);
   }, []);
 
-  const [onlineUsers, setOnlineUsers] = useState([]);
-  const [selectedExecuteurId, setSelectedExecuteurId] = useState("");
-
   useEffect(() => {
     if (form.typeExecuteur) {
       getOnlineExecuteurs(form.typeExecuteur).then(res => {
         setOnlineUsers(res);
-        setSelectedExecuteurId(""); // Reset whenever type changes
-      }).catch(console.error);
-    } else {
-      setOnlineUsers([]);
-      setSelectedExecuteurId("");
+        setSelectedExecuteurId("");
+      }).catch(() => setOnlineUsers([]));
     }
   }, [form.typeExecuteur]);
-
-
-
-  const filteredMachines = machines.filter(m =>
-    m.nom.toLowerCase().includes(machineSearch.toLowerCase())
-  );
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -84,273 +71,305 @@ export default function CreateTicket() {
       ...prev,
       [name]: type === "checkbox" ? checked : value
     }));
-    if (name === "typePoste" && value !== "MACHINE") {
-      setSelectedMachine(null);
-      setMachineSearch("");
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
-
-    if (!form.typePanne || !form.description || !form.typePoste || !form.typeExecuteur) {
-      setError("Veuillez remplir tous les champs obligatoires.");
-      return;
-    }
-
-    let dateArretISO = null;
-    let heureArretFinal = null;
-
-    if (form.equipementArret) {
-      const now = new Date();
-      dateArretISO = now.toISOString();
-      heureArretFinal =
-        now.getHours().toString().padStart(2, "0") +
-        ":" +
-        now.getMinutes().toString().padStart(2, "0");
-    }
-
-    const payload = {
-      segment: form.segment || null,
-      equipement: form.equipement || null,
-      numeroSerie: form.numeroSerie || null,
-      equipementArret: form.equipementArret,
-      dateArret: dateArretISO,
-      heureArret: heureArretFinal,
-      remarque: form.remarque || null,
-      typePanne: form.typePanne,
-      description: form.description,
-      typePoste: form.typePoste,
-      secteurType: form.typePoste === "MACHINE" ? selectedMachine?.secteur || null : form.secteurType || null,
-      typeExecuteur: form.typeExecuteur
-    };
-
     setLoading(true);
     try {
-      await createTicket(user.id, payload, selectedMachine?.id || null, selectedExecuteurId || null);
-      setSuccess("✅ Ticket créé avec succès !");
+      const payload = {
+        ...form,
+        demandeurId: user.id,
+        executeurId: selectedExecuteurId || null,
+        machineId: selectedMachine?.id || null,
+        statut: "OUVERTE",
+        dateCreation: new Date().toISOString(),
+        secteurType: form.typePoste === "MACHINE" ? selectedMachine?.secteur || form.segment : form.segment,
+        equipement: form.typePoste === "MACHINE" ? selectedMachine?.nom || form.equipement : form.equipement,
+        equipementArret: form.equipementArret
+      };
+
+      await createTicket(user.id, payload, selectedMachine?.id, selectedExecuteurId);
+      setSuccess("Ticket créé avec succès !");
       setForm({
-        segment: "", equipement: "", numeroSerie: "",
-        equipementArret: false, dateArret: "", heureArret: "", remarque: "",
-        typePanne: "", description: "", typePoste: "", secteurType: "", typeExecuteur: "",
+        segment: "",
+        equipement: "",
+        numeroSerie: "",
+        equipementArret: false,
+        remarque: "",
+        typePanne: "",
+        description: "",
+        typePoste: "MACHINE",
+        secteurType: "",
+        typeExecuteur: "maintenance",
       });
       setSelectedMachine(null);
-      setMachineSearch("");
+      setSelectedMachineTop(null);
       setSelectedExecuteurId("");
-    } catch (err) {
-      setError(err.response?.data?.message || "Erreur lors de la création du ticket.");
+    } catch (e) {
+      setError("Erreur technique lors de la création.");
     } finally {
       setLoading(false);
     }
   };
 
-  const inputStyle = {
-    width: "100%", padding: "8px 12px", borderRadius: "6px",
-    border: "1px solid #ccc", fontSize: "14px", marginBottom: "0"
+  const handleIAAnalysis = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setLoading(true);
+    setSuccess("Analyse de l'image en cours...");
+    setError("");
+
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const PYTHON_URL = "http://172.20.10.2:5000"; // Même IP que votre API Spring Boot
+        
+        // 1. Prédire le type d'arrêt via la photo
+        const responseCv = await fetch(`${PYTHON_URL}/predict-panne-image`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: base64Image })
+        });
+        const dataCv = await responseCv.json();
+
+        if (dataCv.error) throw new Error(dataCv.error);
+
+        if (dataCv.type_panne === "Image non reconnue") {
+          setError("L'IA n'a pas pu identifier la panne avec certitude.");
+        } else {
+          setForm(prev => ({ ...prev, typePanne: dataCv.type_panne }));
+          
+          // 2. Prédire le service (exécuteur) idéal
+          const responseExec = await fetch(`${PYTHON_URL}/predict-executeur`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type_panne: dataCv.type_panne, type_poste: form.typePoste })
+          });
+          const dataExec = await responseExec.json();
+          
+          setForm(prev => ({ 
+            ...prev, 
+            typeExecuteur: dataExec.type_executeur,
+            remarque: `(IA: Confiance ${(dataCv.confidence * 100).toFixed(1)}%) ${dataExec.commentaire_ia}`
+          }));
+          
+          setSuccess(`IA : Panne identifiée comme "${dataCv.type_panne.toUpperCase()}"`);
+        }
+      };
+    } catch (err) {
+      setError("Le serveur d'IA est injoignable (Port 5000).");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const inputStyle = { width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #ccc", fontSize: "14px" };
   const labelStyle = { display: "block", fontSize: "13px", fontWeight: "600", color: "#475569", marginBottom: "6px" };
   const fieldWrapper = { marginBottom: "18px" };
 
   return (
     <div style={{ padding: "40px", background: "#f8fafc", minHeight: "100vh" }}>
-      <div style={{ maxWidth: "700px", margin: "0 auto" }}>
-        <h1 style={{ marginBottom: "30px" }}>📋 Créer un Ticket</h1>
+      <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+        
+        <h1 style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "30px", fontSize: "28px" }}>
+          <span>📋</span> Créer un Ticket
+        </h1>
 
-        {success && (
-          <div style={{ background: "#dcfce7", color: "#166534", padding: "12px", borderRadius: "8px", marginBottom: "20px" }}>
-            {success}
-          </div>
-        )}
-        {error && (
-          <div style={{ background: "#fee2e2", color: "#991b1b", padding: "12px", borderRadius: "8px", marginBottom: "20px" }}>
-            {error}
-          </div>
-        )}
+        {success && <div style={{ background: "#dcfce7", color: "#166534", padding: "12px", borderRadius: "8px", marginBottom: "20px" }}>{success}</div>}
+        {error && <div style={{ background: "#fee2e2", color: "#991b1b", padding: "12px", borderRadius: "8px", marginBottom: "20px" }}>{error}</div>}
 
         <form onSubmit={handleSubmit} style={{ background: "white", padding: "30px", borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.07)" }}>
 
           {/* === BON DE TRAVAIL === */}
-          <h3 style={{ color: "#1e40af", borderBottom: "2px solid #dbeafe", paddingBottom: "8px", marginBottom: "20px" }}>
-            Bon de Travail
-          </h3>
-
+          <h3 style={{ color: "#1e40af", borderBottom: "1px solid #e2e8f0", paddingBottom: "10px", marginBottom: "20px" }}>Bon de Travail</h3>
+          
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
             <div style={fieldWrapper}>
-              <label style={labelStyle}>Segment / CC</label>
-              <input name="segment" value={form.segment} onChange={handleChange} style={inputStyle} />
+              <label style={labelStyle}>Segment / CC *</label>
+              <select name="segment" value={form.segment} onChange={handleChange} style={inputStyle} required>
+                <option value="">-- Sélectionner --</option>
+                {secteursList.map(s => <option key={s.id} value={s.nom}>{s.nom}</option>)}
+              </select>
             </div>
+            
             <div style={fieldWrapper}>
-              <label style={labelStyle}>Équipement</label>
-              <input name="equipement" value={form.equipement} onChange={handleChange} style={inputStyle} />
+              <label style={labelStyle}>Équipement (Votre machine) *</label>
+              <select 
+                name="equipement"
+                value={selectedMachineTop?.id || ""} 
+                onChange={(e) => {
+                  const m = machines.find(mac => mac.id.toString() === e.target.value);
+                  setSelectedMachineTop(m);
+                  setForm({...form, equipement: m?.nom || ""});
+                }} 
+                style={inputStyle}
+                required
+              >
+                <option value="">-- Choisir votre machine --</option>
+                {machines.filter(m => !form.segment || m.secteur === form.segment).map(m => (
+                  <option key={m.id} value={m.id}>{m.nom} ({m.codeMachine})</option>
+                ))}
+              </select>
             </div>
+
             <div style={fieldWrapper}>
               <label style={labelStyle}>N° Série / Position</label>
               <input name="numeroSerie" value={form.numeroSerie} onChange={handleChange} style={inputStyle} />
             </div>
-            <div style={fieldWrapper}>
-              <label style={labelStyle}>Remarque</label>
-              <input name="remarque" value={form.remarque} onChange={handleChange} style={inputStyle} />
-            </div>
           </div>
 
-          <div style={{ ...fieldWrapper, display: "flex", alignItems: "center", gap: "12px" }}>
-            <input type="checkbox" name="equipementArret" id="equipementArret" checked={form.equipementArret} onChange={handleChange} style={{ width: "16px", height: "16px" }} />
-            <label htmlFor="equipementArret" style={{ ...labelStyle, marginBottom: 0, cursor: "pointer", color: form.equipementArret ? "#dc2626" : "#475569" }}>
-              {form.equipementArret ? "🔴 Équipement en ARRÊT" : "🟢 Équipement en MARCHE"}
+          {/* === DÉTAILS PANNE === */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #e2e8f0", paddingBottom: "10px", marginBottom: "20px", marginTop: "10px" }}>
+            <h3 style={{ color: "#1e40af", margin: 0 }}>Détails de la Panne</h3>
+            <label style={{ 
+              background: "#1e293b", color: "white", padding: "6px 12px", borderRadius: "20px", fontSize: "11px", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" 
+            }}>
+              📷 ANALYSER PHOTO (IA)
+              <input type="file" accept="image/*" onChange={handleIAAnalysis} style={{ display: "none" }} />
             </label>
           </div>
-
-          {/* === PANNE === */}
-          <h3 style={{ color: "#1e40af", borderBottom: "2px solid #dbeafe", paddingBottom: "8px", marginBottom: "20px", marginTop: "10px" }}>
-            Détails de la Panne
-          </h3>
-
+          
           <div style={fieldWrapper}>
-            <label style={labelStyle}>Type de Panne *</label>
+            <label style={labelStyle}>Type d'Arrêt *</label>
             <select name="typePanne" value={form.typePanne} onChange={handleChange} style={inputStyle} required>
-              <option value="">-- Sélectionner le type de panne --</option>
-              {TYPE_PANNE_LIST.map(tp => (
-                <option key={tp} value={tp}>
-                  {tp.replace(/_/g, " ").charAt(0).toUpperCase() + tp.replace(/_/g, " ").slice(1)}
-                </option>
-              ))}
+              <option value="">-- Sélectionner le type d'arrêt --</option>
+              {TYPE_PANNE_LIST.map(tp => <option key={tp} value={tp}>{tp.toUpperCase()}</option>)}
             </select>
           </div>
 
           <div style={fieldWrapper}>
             <label style={labelStyle}>Description *</label>
-            <textarea name="description" value={form.description} onChange={handleChange} rows={3} style={{ ...inputStyle, resize: "vertical" }} required />
+            <textarea name="description" value={form.description} onChange={handleChange} rows={3} style={{ ...inputStyle, resize: "none" }} required />
           </div>
 
-          {/* === TYPE POSTE === */}
-          <h3 style={{ color: "#1e40af", borderBottom: "2px solid #dbeafe", paddingBottom: "8px", marginBottom: "20px", marginTop: "10px" }}>
-            Affectation
-          </h3>
+          {/* === AFFECTATION === */}
+          <h3 style={{ color: "#1e40af", borderBottom: "1px solid #e2e8f0", paddingBottom: "10px", marginBottom: "20px", marginTop: "10px" }}>Affectation</h3>
 
           <div style={fieldWrapper}>
             <label style={labelStyle}>Type Poste *</label>
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
               {TYPE_POSTE_LIST.map(tp => (
-                <label key={tp} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", background: form.typePoste === tp ? "#2563eb" : "#f1f5f9", color: form.typePoste === tp ? "white" : "#334155", padding: "8px 16px", borderRadius: "20px", fontSize: "13px", fontWeight: "600" }}>
-                  <input type="radio" name="typePoste" value={tp} checked={form.typePoste === tp} onChange={handleChange} style={{ display: "none" }} />
-                  {tp.toUpperCase()}
-                </label>
+                <button
+                  key={tp} type="button"
+                  onClick={() => {
+                    setForm({...form, typePoste: tp});
+                    if (tp !== "MACHINE") setSelectedMachine(null);
+                  }}
+                  style={{
+                    padding: "8px 16px", borderRadius: "20px", border: "1px solid #e2e8f0", fontSize: "12px", fontWeight: "700",
+                    background: form.typePoste === tp ? "#3b82f6" : "#f8fafc", color: form.typePoste === tp ? "white" : "#64748b"
+                  }}
+                >
+                  {tp}
+                </button>
               ))}
             </div>
           </div>
 
-          {/* Machine selection */}
           {form.typePoste === "MACHINE" && (
-            <div style={fieldWrapper}>
-              <label style={labelStyle}>Sélectionner la Machine</label>
-              {selectedMachine ? (
-                <div style={{ background: "#eff6ff", border: "1px solid #93c5fd", padding: "12px", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <div style={{ fontWeight: "600" }}>{selectedMachine.nom}</div>
-                    <div style={{ fontSize: "12px", color: "#64748b" }}>{selectedMachine.secteur} – {selectedMachine.process}</div>
-                  </div>
-                  <button type="button" onClick={() => { setSelectedMachine(null); setMachineSearch(""); }} style={{ background: "none", border: "1px solid #2563eb", color: "#2563eb", padding: "4px 10px", borderRadius: "6px", cursor: "pointer" }}>
-                    Changer
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <input placeholder="Rechercher une machine..." value={machineSearch} onChange={e => setMachineSearch(e.target.value)} style={inputStyle} />
-                  <div style={{ maxHeight: "180px", overflowY: "auto", border: "1px solid #e2e8f0", borderRadius: "6px", marginTop: "4px" }}>
-                    {filteredMachines.map(m => (
-                      <div key={m.id} onClick={() => setSelectedMachine(m)} style={{ padding: "10px 12px", cursor: "pointer", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between" }}>
-                        <span style={{ fontWeight: "500" }}>{m.nom}</span>
-                        <span style={{ color: "#94a3b8", fontSize: "12px" }}>{m.secteur}</span>
-                      </div>
-                    ))}
-                    {filteredMachines.length === 0 && <div style={{ padding: "10px", color: "#94a3b8", textAlign: "center" }}>Aucune machine trouvée</div>}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-
-          {/* Secteur (if not MACHINE) */}
-          {form.typePoste && form.typePoste !== "MACHINE" && (
-            <div style={fieldWrapper}>
-              <label style={labelStyle}>Secteur</label>
-              <select name="secteurType" value={form.secteurType} onChange={handleChange} style={inputStyle}>
-                <option value="">Sélectionner un secteur</option>
-                {secteursList.map(s => (
-                  <option key={s.id} value={s.nom}>{s.nom}</option>
+            <div style={{ ...fieldWrapper, background: "#f8fafc", padding: "15px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+              <label style={labelStyle}>Sélectionner la Machine en Panne *</label>
+              <select 
+                value={selectedMachine?.id || ""} 
+                onChange={(e) => {
+                  const m = machines.find(mac => mac.id.toString() === e.target.value);
+                  if (m?.enArret) {
+                    alert("Interdit : Cette machine est déjà signalée en arrêt. Vous ne pouvez pas créer un autre ticket.");
+                    return;
+                  }
+                  setSelectedMachine(m);
+                }} 
+                style={{ ...inputStyle, border: selectedMachine ? "2px solid #3b82f6" : "1px solid #ccc" }}
+                required
+              >
+                <option value="">-- Choisir la machine --</option>
+                {machines.filter(m => !form.segment || m.secteur === form.segment).map(m => (
+                  <option 
+                    key={m.id} 
+                    value={m.id} 
+                    style={{ color: m.enArret ? "red" : "black" }}
+                  >
+                    {m.nom} {m.enArret ? "(DÉJÀ EN ARRÊT ⛔)" : ""}
+                  </option>
                 ))}
               </select>
-            </div>
-          )}
-
-
-
-          {/* Type Exécuteur */}
-          <div style={fieldWrapper}>
-            <label style={labelStyle}>Type Exécuteur *</label>
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-              {TYPE_EXECUTEUR_LIST.map(exec => (
-                <label key={exec} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", background: form.typeExecuteur === exec ? "#2563eb" : "#f1f5f9", color: form.typeExecuteur === exec ? "white" : "#334155", padding: "7px 14px", borderRadius: "20px", fontSize: "13px", fontWeight: "600" }}>
-                  <input type="radio" name="typeExecuteur" value={exec} checked={form.typeExecuteur === exec} onChange={handleChange} style={{ display: "none" }} />
-                  {exec.charAt(0).toUpperCase() + exec.slice(1)}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Target Executeur (Online) */}
-          {form.typeExecuteur && (
-            <div style={fieldWrapper}>
-              <label style={labelStyle}>Assignation Ciblée (Optionnel)</label>
-              <div style={{fontSize: "13px", color: "#64748b", marginBottom: "8px"}}>
-                Sélectionnez un technicien en ligne pour lui assigner directement ce ticket, ou ne choisissez personne pour notifier tout le groupe.
-              </div>
-              {onlineUsers.length === 0 ? (
-                <div style={{padding: "10px", background: "#f1f5f9", borderRadius: "6px", color: "#64748b", fontSize: "14px"}}>
-                  Aucun membre de ce département n'est actuellement en ligne.
-                </div>
-              ) : (
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                  <div
-                    onClick={() => setSelectedExecuteurId("")}
-                    style={{
-                      padding: "8px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "500",
-                      background: selectedExecuteurId === "" ? "#2563eb" : "#f1f5f9",
-                      color: selectedExecuteurId === "" ? "white" : "#334155"
-                    }}
-                  >
-                    Assigner au groupe ({onlineUsers.length} en ligne)
-                  </div>
-                  {onlineUsers.map(u => (
-                    <div
-                      key={u.id}
-                      onClick={() => setSelectedExecuteurId(u.id)}
-                      style={{
-                        padding: "8px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "500",
-                        display: "flex", alignItems: "center", gap: "6px",
-                        background: selectedExecuteurId === u.id ? "#2563eb" : "#f0fdf4",
-                        color: selectedExecuteurId === u.id ? "white" : "#166534",
-                        border: selectedExecuteurId === u.id ? "none" : "1px solid #bbf7d0"
-                      }}
-                    >
-                      <div style={{width: "8px", height: "8px", borderRadius: "50%", background: selectedExecuteurId === u.id ? "white" : "#22c55e"}}></div>
-                      {u.nom}
-                    </div>
-                  ))}
-                </div>
+              {selectedMachine?.enArret && (
+                <p style={{ color: "red", fontSize: "11px", marginTop: "5px", fontWeight: "bold" }}>
+                  Attention: Cette machine est déjà signalée en arrêt.
+                </p>
               )}
             </div>
           )}
 
-          <button
-            type="submit"
+          <div style={fieldWrapper}>
+            <label style={labelStyle}>Type Exécuteur *</label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+              {TYPE_EXECUTEUR_LIST.map(te => (
+                <button
+                  key={te} type="button"
+                  onClick={() => setForm({...form, typeExecuteur: te})}
+                  style={{
+                    padding: "8px 16px", borderRadius: "20px", border: "1px solid #e2e8f0", fontSize: "12px", fontWeight: "700",
+                    background: form.typeExecuteur === te ? "#3b82f6" : "#f8fafc", color: form.typeExecuteur === te ? "white" : "#64748b"
+                  }}
+                >
+                  {te.charAt(0).toUpperCase() + te.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={fieldWrapper}>
+            <label style={labelStyle}>Priorité *</label>
+            <div style={{ display: "flex", gap: "10px" }}>
+              {["BASSE", "MOYENNE", "HAUTE"].map(p => (
+                <button
+                  key={p} type="button"
+                  onClick={() => setForm({...form, priorite: p})}
+                  style={{
+                    flex: 1, padding: "8px", borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: "12px", fontWeight: "700",
+                    background: form.priorite === p ? (p === 'HAUTE' ? '#ef4444' : p === 'MOYENNE' ? '#f59e0b' : '#10b981') : '#f8fafc',
+                    color: form.priorite === p ? "white" : "#64748b"
+                  }}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ background: "#eff6ff", padding: "20px", borderRadius: "10px", marginTop: "20px" }}>
+            <p style={{ fontSize: "13px", fontWeight: "700", color: "#1e40af", marginBottom: "5px" }}>Assignation Ciblée (Optionnel)</p>
+            <p style={{ fontSize: "12px", color: "#60a5fa", marginBottom: "15px" }}>Sélectionnez un technicien en ligne pour lui assigner directement ce ticket.</p>
+            
+            {onlineUsers.length > 0 ? (
+              <select value={selectedExecuteurId} onChange={(e) => setSelectedExecuteurId(e.target.value)} style={inputStyle}>
+                <option value="">-- Sélectionner un technicien en ligne --</option>
+                {onlineUsers.map(u => <option key={u.id} value={u.id}>{u.nom}</option>)}
+              </select>
+            ) : (
+              <div style={{ background: "#f8fafc", padding: "10px", borderRadius: "6px", textAlign: "center", color: "#94a3b8", fontSize: "12px" }}>
+                Aucun membre de ce département n'est actuellement en ligne.
+              </div>
+            )}
+          </div>
+
+          <div style={{ ...fieldWrapper, marginTop: "20px" }}>
+            <label style={labelStyle}>Remarque Finale</label>
+            <input name="remarque" value={form.remarque} onChange={handleChange} style={inputStyle} placeholder="Observations éventuelles..." />
+          </div>
+
+          <button 
+            type="submit" 
             disabled={loading}
-            style={{ width: "100%", background: loading ? "#93c5fd" : "#2563eb", color: "white", padding: "12px", border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: "600", cursor: loading ? "not-allowed" : "pointer", marginTop: "10px" }}
+            style={{ width: "100%", padding: "12px", marginTop: "15px", borderRadius: "8px", background: "#3b82f6", color: "white", fontWeight: "700", border: "none", cursor: "pointer" }}
           >
-            {loading ? "Envoi en cours..." : "🚀 Créer le Ticket"}
+            🚀 Créer le Ticket
           </button>
+
         </form>
       </div>
     </div>

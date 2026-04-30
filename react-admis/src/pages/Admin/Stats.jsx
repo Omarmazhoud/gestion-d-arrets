@@ -68,7 +68,7 @@ function Stats() {
           borderRadius: "10px",
           boxShadow: "0 5px 15px rgba(0,0,0,0.1)"
         }}>
-          <h4>Répartition des Machines</h4>
+          <h4>Gestion des Machines</h4>
           <Pie data={pieData} />
         </div>
 

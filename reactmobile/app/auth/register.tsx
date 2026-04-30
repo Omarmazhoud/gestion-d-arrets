@@ -80,6 +80,7 @@ export default function Register() {
           style={styles.logo} 
           resizeMode="contain" 
         />
+        <Text style={styles.logoSubtitle}>L-DTM</Text>
       </View>
 
       <View style={styles.formBox}>
@@ -197,6 +198,14 @@ const styles = StyleSheet.create({
   logo: {
     width: 280,
     height: 100
+  },
+  logoSubtitle: {
+    fontSize: 24,
+    fontWeight: "900",
+    color: "#005A9C",
+    marginTop: -8,
+    letterSpacing: 2,
+    textTransform: "uppercase"
   },
   formBox: {
     backgroundColor: "#FFFFFF",

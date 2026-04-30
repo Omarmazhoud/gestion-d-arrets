@@ -3,6 +3,7 @@ package com.example.demo.model.entity;
 import java.util.Date;
 
 
+import com.example.demo.model.enums.Priorite;
 import com.example.demo.model.enums.TicketStatus;
 import com.example.demo.model.enums.TypeExecuteur;
 import com.example.demo.model.enums.TypePoste;
@@ -50,6 +51,9 @@ public class TicketPanne {
 
     @Enumerated(EnumType.STRING)
     private TicketStatus statut;
+
+    @Enumerated(EnumType.STRING)
+    private Priorite priorite;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCreation;
@@ -205,6 +209,14 @@ public class TicketPanne {
 
     public void setStatut(TicketStatus statut) {
         this.statut = statut;
+    }
+
+    public Priorite getPriorite() {
+        return priorite;
+    }
+
+    public void setPriorite(Priorite priorite) {
+        this.priorite = priorite;
     }
 
     public Date getDateCreation() {

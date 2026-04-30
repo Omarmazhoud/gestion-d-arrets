@@ -72,7 +72,7 @@ function Stats() {
   };
 
   /* =========================
-     2. Pannes par machine (Filtré par année)
+     2. Arrêts par machine (Filtré par année)
   ========================== */
   const panneParMachine = {};
   machines.forEach((m) => {
@@ -93,7 +93,7 @@ function Stats() {
     labels: Object.keys(panneParMachine),
     datasets: [
       {
-        label: `Pannes en ${anneeSelectionnee}`,
+        label: `Arrêts en ${anneeSelectionnee}`,
         data: Object.values(panneParMachine),
         backgroundColor: "#f39c12"
       }
@@ -101,7 +101,7 @@ function Stats() {
   };
 
   /* =========================
-     3. Pannes par type
+     3. Arrêts par type
   ========================== */
   const panneParType = {};
   tickets.forEach((t) => {
@@ -113,7 +113,7 @@ function Stats() {
     labels: Object.keys(panneParType),
     datasets: [
       {
-        label: "Pannes par type",
+        label: "Arrêts par type",
         data: Object.values(panneParType),
         backgroundColor: "#3498db"
       }
@@ -121,7 +121,7 @@ function Stats() {
   };
 
   /* =========================
-     4. Temps moyen réparation par type panne
+     4. Temps moyen réparation par type d'arrêt
   ========================== */
   const dureeParType = {};
   const countParType = {};
@@ -181,7 +181,7 @@ function Stats() {
   };
 
   /* =========================
-     6. Pannes par mois
+     6. Arrêts par mois
   ========================== */
   const moisLabels = [
     "Jan", "Fev", "Mar", "Avr", "Mai", "Juin",
@@ -206,7 +206,7 @@ function Stats() {
     labels: moisLabels,
     datasets: [
       {
-        label: "Nombre de pannes",
+        label: "Nombre d'arrêts",
         data: panneParMois,
         borderColor: "#e67e22",
         backgroundColor: "#e67e22",
@@ -348,7 +348,7 @@ function Stats() {
         callbacks: {
           label: function(context) {
             const machName = context.dataset.machineNames[context.dataIndex];
-            return machName ? `${machName} : ${context.raw} pannes` : "Aucune";
+            return machName ? `${machName} : ${context.raw} arrêts` : "Aucune";
           }
         }
       }
@@ -387,12 +387,12 @@ function Stats() {
 
       <div style={grid}>
         <div style={cardStyle}>
-          <h4>Répartition des Machines</h4>
+          <h4>Gestion des Machines</h4>
           <Pie data={pieData} />
         </div>
 
         <div style={cardStyle}>
-          <h4>Pannes par Type</h4>
+          <h4>Gestion des Arrêts par Type</h4>
           <Bar data={panneTypeData} />
         </div>
 
@@ -407,12 +407,12 @@ function Stats() {
         </div>
 
         <div style={{ ...cardStyle, gridColumn: "1 / -1" }}>
-          <h4>Pannes par Machine</h4>
+          <h4>Arrêts par Machine</h4>
           <Bar data={panneMachineData} />
         </div>
 
         <div style={cardStyle}>
-          <h4>Pannes par Mois</h4>
+          <h4>Arrêts par Mois</h4>
           <Line data={moisData} />
         </div>
 
@@ -423,7 +423,7 @@ function Stats() {
         </div>
 
         <div style={{ ...cardStyle, gridColumn: "1 / -1" }}>
-          <h4>Top 3 Machines avec pannes par mois</h4>
+          <h4>Top 3 Machines avec arrêts par mois</h4>
           <Bar data={topMachinesData} options={topMachinesOptions} />
         </div>
 

@@ -121,7 +121,7 @@ export default function Dashboard() {
           <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             <div style={welcomeIcon}><FaCogs size={30} /></div>
             <div>
-              <h2 style={{ margin: 0, fontSize: "20px" }}>Centre de Contrôle LEONI</h2>
+              <h2 style={{ margin: 0, fontSize: "20px" }}>Centre de Contrôle L-DTM</h2>
               <p style={{ margin: "4px 0 0 0", opacity: 0.8 }}>Bienvenue, {user?.nom}. Supervision opérationnelle du parc machine.</p>
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function Dashboard() {
               style={{ position: "relative", cursor: "pointer", background: "white", padding: "10px", borderRadius: "12px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)" }}
               onClick={() => setShowNotifModal(true)}
             >
-              <FaWrench size={24} color="#0f172a" />
+              <FaWrench size={24} color="var(--primary-bg)" />
               {notifsPiece.length > 0 && (
                 <div style={{ position: "absolute", top: "-5px", right: "-5px", background: "#ef4444", color: "white", borderRadius: "50%", padding: "2px 6px", fontSize: "12px", fontWeight: "bold", border: "2px solid #f1f5f9" }}>
                   {notifsPiece.length}
@@ -180,7 +180,7 @@ export default function Dashboard() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 999, display: "flex", justifyContent: "center", alignItems: "center" }}>
           <div style={{ background: "white", padding: "30px", borderRadius: "20px", width: "500px", maxWidth: "90%", maxHeight: "80vh", overflowY: "auto", boxShadow: "0 25px 50px rgba(0,0,0,0.25)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-              <h2 style={{ margin: 0, display: "flex", alignItems: "center", gap: "10px", color: "#0f172a" }}>
+              <h2 style={{ margin: 0, display: "flex", alignItems: "center", gap: "10px", color: "var(--primary-bg)" }}>
                 <FaWrench color="#f59e0b" /> Alertes Pièces Inconnues
               </h2>
               <button 
@@ -228,7 +228,7 @@ export default function Dashboard() {
 const containerStyle = { width: "100%" };
 
 const welcomeBanner = {
-  background: "linear-gradient(90deg, #0f172a 0%, #1e293b 100%)",
+  background: "linear-gradient(90deg, var(--primary-bg) 0%, var(--secondary-bg) 100%)",
   color: "white",
   padding: "24px 30px",
   borderRadius: "20px",
@@ -257,7 +257,7 @@ const headerStyle = {
 const titleStyle = {
   fontSize: "28px",
   fontWeight: "900",
-  color: "#0f172a",
+  color: "var(--primary-bg)",
   margin: 0,
 };
 
@@ -276,7 +276,7 @@ const statusBadge = {
   borderRadius: "30px",
   fontSize: "13px",
   fontWeight: "800",
-  color: "#0f172a",
+  color: "var(--primary-bg)",
 };
 
 const pulse = {
@@ -331,7 +331,7 @@ const cardTitle = (isSuper) => ({
 const cardValue = (isSuper) => ({
   fontSize: isSuper ? "42px" : "32px",
   fontWeight: "900",
-  color: "#0f172a",
+  color: "var(--primary-bg)",
   margin: 0,
 });
 
@@ -351,4 +351,4 @@ const cardFooter = (color) => ({
   height: "5px",
   background: color,
   width: "100%",
-});
+});

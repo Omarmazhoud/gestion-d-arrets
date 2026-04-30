@@ -135,7 +135,7 @@ export default function Processes() {
                     <div style={{ width: "50px", height: "50px", background: "#f1f5f9", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: "#94a3b8", fontWeight: "bold" }}>ICON</div>
                   )}
                 </td>
-                <td style={{ padding: "16px 24px", fontWeight: "700", color: "#0f172a" }}>{p.nom}</td>
+                <td style={{ padding: "16px 24px", fontWeight: "700", color: "var(--primary-bg)" }}>{p.nom}</td>
                 <td style={{ padding: "16px 24px", color: "#475569", fontSize: "14px" }}>{p.description || "-"}</td>
                 {isSuperAdmin && (
                   <td style={{ padding: "16px 24px", textAlign: "right" }}>
@@ -164,7 +164,7 @@ export default function Processes() {
       {showModal && isSuperAdmin && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 2000, backdropFilter: "blur(4px)" }}>
           <div style={{ background: "white", padding: "35px", borderRadius: "24px", width: "450px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)" }}>
-            <h3 style={{ margin: 0, fontSize: "22px", fontWeight: "800", color: "#0f172a" }}>{editingId ? "Modifier le Process" : "Créer un Process"}</h3>
+            <h3 style={{ margin: 0, fontSize: "22px", fontWeight: "800", color: "var(--primary-bg)" }}>{editingId ? "Modifier le Process" : "Créer un Process"}</h3>
             <p style={{ color: "#64748b", fontSize: "14px", marginTop: "5px", marginBottom: "30px" }}>Veuillez remplir les informations ci-dessous.</p>
             
             <div style={{ marginBottom: "20px" }}>

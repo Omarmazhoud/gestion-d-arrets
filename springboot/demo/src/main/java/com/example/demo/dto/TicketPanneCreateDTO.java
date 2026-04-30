@@ -3,6 +3,7 @@ package com.example.demo.dto;
 import java.util.Date;
 
 
+import com.example.demo.model.enums.Priorite;
 import com.example.demo.model.enums.TypeExecuteur;
 import com.example.demo.model.enums.TypePoste;
 
@@ -20,6 +21,7 @@ public class TicketPanneCreateDTO {
     // ===== PANNE =====
     private String typePanne;
     private String description;
+    private Priorite priorite;
 
     // ===== TYPE =====
     private TypePoste typePoste;
@@ -101,6 +103,14 @@ public class TicketPanneCreateDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Priorite getPriorite() {
+        return priorite;
+    }
+
+    public void setPriorite(Priorite priorite) {
+        this.priorite = priorite;
     }
 
     public TypePoste getTypePoste() {

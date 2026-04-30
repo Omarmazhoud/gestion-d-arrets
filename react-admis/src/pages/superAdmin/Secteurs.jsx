@@ -48,7 +48,7 @@ export default function Secteurs() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce secteur ?")) {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce segment ?")) {
       try {
         await deleteSecteur(id);
         loadSecteurs();
@@ -67,7 +67,7 @@ export default function Secteurs() {
       
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#1e293b", margin: 0 }}>Gestion des Secteurs</h1>
+          <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#1e293b", margin: 0 }}>Gestion des Segments</h1>
           <p style={{ color: "#64748b", margin: "5px 0 0 0" }}>Supervisez les différentes zones de l'usine et leurs responsables.</p>
         </div>
         
@@ -90,7 +90,7 @@ export default function Secteurs() {
               transition: "transform 0.2s"
             }}
           >
-            + Nouveau Secteur
+            + Nouveau Segment
           </button>
         )}
       </div>
@@ -98,7 +98,7 @@ export default function Secteurs() {
       <div style={{ background: "white", padding: "24px", borderRadius: "16px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", marginBottom: "25px" }}>
         <input
           type="text"
-          placeholder="Rechercher un secteur..."
+          placeholder="Rechercher un segment..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{ 
@@ -117,7 +117,7 @@ export default function Secteurs() {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead style={{ background: "#f8fafc", borderBottom: "2px solid #f1f5f9" }}>
             <tr>
-              <th style={{ padding: "18px 24px", textAlign: "left", color: "#64748b", fontSize: "12px", fontWeight: "700", textTransform: "uppercase" }}>Nom du Secteur</th>
+              <th style={{ padding: "18px 24px", textAlign: "left", color: "#64748b", fontSize: "12px", fontWeight: "700", textTransform: "uppercase" }}>Nom du Segment</th>
               <th style={{ padding: "18px 24px", textAlign: "left", color: "#64748b", fontSize: "12px", fontWeight: "700", textTransform: "uppercase" }}>Responsable (Chef)</th>
               <th style={{ padding: "18px 24px", textAlign: "left", color: "#64748b", fontSize: "12px", fontWeight: "700", textTransform: "uppercase" }}>Matricule</th>
               {isSuperAdmin && <th style={{ padding: "18px 24px", textAlign: "right", color: "#64748b", fontSize: "12px", fontWeight: "700", textTransform: "uppercase" }}>Actions</th>}
@@ -129,7 +129,7 @@ export default function Secteurs() {
                 <td style={{ padding: "16px 24px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#0ea5e9" }}></div>
-                    <span style={{ fontWeight: "700", color: "#0f172a" }}>{s.nom}</span>
+                    <span style={{ fontWeight: "700", color: "var(--primary-bg)" }}>{s.nom}</span>
                   </div>
                 </td>
                 <td style={{ padding: "16px 24px", color: "#475569", fontWeight: "500" }}>{s.nomChef || "Non défini"}</td>
@@ -161,11 +161,11 @@ export default function Secteurs() {
       {showModal && isSuperAdmin && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 2000, backdropFilter: "blur(4px)" }}>
           <div style={{ background: "white", padding: "35px", borderRadius: "24px", width: "450px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)" }}>
-            <h3 style={{ margin: 0, fontSize: "22px", fontWeight: "800", color: "#0f172a" }}>{editingId ? "Modifier le Secteur" : "Nouveau Secteur"}</h3>
+            <h3 style={{ margin: 0, fontSize: "22px", fontWeight: "800", color: "var(--primary-bg)" }}>{editingId ? "Modifier le Segment" : "Nouveau Segment"}</h3>
             <p style={{ color: "#64748b", fontSize: "14px", marginTop: "5px", marginBottom: "30px" }}>Veuillez configurer la zone de production.</p>
             
             <div style={{ marginBottom: "20px" }}>
-              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#475569", marginBottom: "8px", textTransform: "uppercase" }}>Désignation du Secteur *</label>
+              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", color: "#475569", marginBottom: "8px", textTransform: "uppercase" }}>Désignation du Segment *</label>
               <input 
                 name="nom" 
                 value={form.nom} 

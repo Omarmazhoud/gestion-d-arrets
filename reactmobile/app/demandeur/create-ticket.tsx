@@ -12,7 +12,7 @@ import { useState, useEffect } from "react";
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import axios from "axios";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { BASE_URL } from "@/constants/api";
 
 const TYPE_EXECUTEUR_LIST = [
@@ -60,19 +60,20 @@ type Machine = {
 export default function CreateTicket() {
   const { userId } = useLocalSearchParams();
   const demandeurId = userId || "1";
+  const router = useRouter();
 
   // BON DE TRAVAIL
   const [segment, setSegment] = useState("");
   const [equipement, setEquipement] = useState("");
   const [numeroSerie, setNumeroSerie] = useState("");
-  const [equipementArret, setEquipementArret] = useState(false);
-  const [dateArret, setDateArret] = useState("");
-  const [heureArret, setHeureArret] = useState("");
   const [remarque, setRemarque] = useState("");
 
   // PANNE
   const [typePanne, setTypePanne] = useState("");
   const [description, setDescription] = useState("");
+
+  // PRIORITE
+  const [priorite, setPriorite] = useState("MOYENNE");
 
   // TYPE
   const [typePoste, setTypePoste] = useState("");
@@ -126,7 +127,7 @@ export default function CreateTicket() {
         const foundMachine = machines.find(m => m.id === parsedData.id);
         if (foundMachine) {
           if (foundMachine.enArret) {
-            Alert.alert("Interdit", "Cette machine est déjà signalée en panne (en arrêt). Vous ne pouvez pas créer un autre ticket pour celle-ci.");
+            Alert.alert("Interdit", "Cette machine est déjà signalée en arrêt. Vous ne pouvez pas créer un autre ticket pour celle-ci.");
             return;
           }
           setSelectedMachine(foundMachine);
@@ -199,10 +200,10 @@ export default function CreateTicket() {
           setTypePanne(data.type_panne);
           Alert.alert(
             "🤖 Analyse IA Terminée", 
-            `L'IA a détecté une panne de type "${data.type_panne}" avec une confiance de ${Math.round(data.confidence * 100)}%.`
+            `L'IA a détecté un arrêt de type "${data.type_panne}" avec une confiance de ${Math.round(data.confidence * 100)}%.`
           );
       } else {
-          Alert.alert("🤔 Analyse IA", "L'IA n'a pas pu reconnaître la panne avec certitude (confiance trop faible). Veuillez sélectionner le type manuellement.");
+          Alert.alert("🤔 Analyse IA", "L'IA n'a pas pu reconnaître l'arrêt avec certitude (confiance trop faible). Veuillez sélectionner le type manuellement.");
       }
     } catch (err: any) {
       // Ignorer l'alerte si le modèle n'est pas encore entraîné ou si le serveur python crashe
@@ -218,26 +219,22 @@ export default function CreateTicket() {
       return;
     }
 
-    let autoDate = "";
-    let autoHeure = "";
-
-    if (equipementArret) {
-      const now = new Date();
-      autoDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
-      autoHeure = now.getHours().toString().padStart(2, '0') + ":" +
-        now.getMinutes().toString().padStart(2, '0'); // HH:mm
-    }
+    const now = new Date();
+    const autoDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const autoHeure = now.getHours().toString().padStart(2, '0') + ":" +
+      now.getMinutes().toString().padStart(2, '0'); // HH:mm
 
     const payload = {
       segment: segment || null,
       equipement: equipement || null,
       numeroSerie: numeroSerie || null,
-      equipementArret,
-      dateArret: (autoDate || dateArret) ? (autoDate || dateArret) : null,
-      heureArret: (autoHeure || heureArret) ? (autoHeure || heureArret) : null,
+      equipementArret: true,
+      dateArret: autoDate,
+      heureArret: autoHeure,
       remarque: remarque || null,
       typePanne,
       description,
+      priorite,
       typePoste,
       secteurType:
         typePoste === "MACHINE"
@@ -253,8 +250,9 @@ export default function CreateTicket() {
         payload,
         { params: { machineId: selectedMachine?.id || "" } }
       );
-
-      Alert.alert("Succès", "Ticket créé");
+      Alert.alert("Succès", "Ticket créé avec succès !", [
+        { text: "OK", onPress: () => router.replace("/demandeur") }
+      ]);
 
     } catch (error) {
       console.log(error);
@@ -287,31 +285,81 @@ export default function CreateTicket() {
     <ScrollView style={styles.container}>
       <Text style={styles.title}>BON DE TRAVAIL</Text>
 
+
+
       {/* SEGMENT */}
-      <Text style={styles.label}>Segment / CC</Text>
-      <TextInput style={styles.input} value={segment} onChangeText={setSegment} />
+      <Text style={styles.label}>Segment</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 15 }}>
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          {secteursList.map(sec => (
+            <TouchableOpacity
+              key={sec.id || sec.nom}
+              style={[
+                styles.typeButton,
+                segment === sec.nom && styles.activeTypeButton,
+                { paddingHorizontal: 12 }
+              ]}
+              onPress={() => {
+                setSegment(sec.nom);
+                setEquipement("");
+                setSelectedMachine(null);
+              }}
+            >
+              <Text style={[styles.typeButtonText, segment === sec.nom && styles.activeTypeButtonText]}>
+                {sec.nom}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
 
       {/* EQUIPEMENT */}
-      <Text style={styles.label}>Équipement</Text>
-      <TextInput style={styles.input} value={equipement} onChangeText={setEquipement} />
+      {segment !== "" && (
+        <>
+          <Text style={styles.label}>Équipement</Text>
+          <View style={{ marginBottom: 15 }}>
+            {machines.filter(m => m.secteur === segment).map(item => (
+              <TouchableOpacity
+                key={item.id}
+                style={[
+                  styles.machineItem,
+                  equipement === item.nom && { backgroundColor: "#eff6ff", borderColor: "#2563eb", borderWidth: 2, shadowColor: "#2563eb", shadowOpacity: 0.1, shadowRadius: 5 }
+                ]}
+                onPress={() => {
+                  setEquipement(item.nom);
+                }}
+              >
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                    <View style={{ width: 42, height: 42, borderRadius: 10, backgroundColor: equipement === item.nom ? "#bfdbfe" : "#f1f5f9", justifyContent: "center", alignItems: "center" }}>
+                      <Text style={{ fontSize: 20 }}>⚙️</Text>
+                    </View>
+                    <View>
+                      <Text style={[styles.machineItemText, equipement === item.nom && { color: "#1e40af", fontWeight: "bold" }]}>{item.nom}</Text>
+                      <Text style={styles.machineItemSub}>{item.process || "Poste d'intervention"}</Text>
+                    </View>
+                  </View>
+                  {equipement === item.nom && (
+                     <View style={{ backgroundColor: "#2563eb", borderRadius: 12, padding: 2 }}>
+                       <Text style={{ fontSize: 12, color: "white" }}>✔️</Text>
+                     </View>
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))}
+            {machines.filter(m => m.secteur === segment).length === 0 && (
+              <Text style={styles.infoText}>Aucun équipement disponible dans ce segment.</Text>
+            )}
+          </View>
+        </>
+      )}
 
       {/* NUMERO SERIE */}
       <Text style={styles.label}>N° Série / Position</Text>
       <TextInput style={styles.input} value={numeroSerie} onChangeText={setNumeroSerie} />
 
-      {/* ARRET */}
-      <Text style={styles.label}>Équipement en arrêt</Text>
-      <TouchableOpacity
-        style={[styles.selectButton, equipementArret && styles.activeButton]}
-        onPress={() => setEquipementArret(!equipementArret)}
-      >
-        <Text style={{ color: equipementArret ? "white" : "black" }}>
-          {equipementArret ? "OUI" : "NON"}
-        </Text>
-      </TouchableOpacity>
-
-      {/* TYPE PANNE */}
-      <Text style={styles.label}>Type de Panne</Text>
+      {/* TYPE D'ARRÊTS */}
+      <Text style={styles.label}>Type d'Arrêts</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 15 }}>
         <View style={{ flexDirection: "row", gap: 8 }}>
           {TYPE_PANNE_LIST.map(tp => (
@@ -331,6 +379,31 @@ export default function CreateTicket() {
           ))}
         </View>
       </ScrollView>
+
+      {/* PRIORITE */}
+      <Text style={styles.label}>Niveau de Priorité</Text>
+      <View style={{ flexDirection: "row", gap: 10, marginBottom: 15 }}>
+        {["BASSE", "MOYENNE", "HAUTE"].map(p => {
+          let bgColor = "#10b981"; // BASSE
+          if (p === "MOYENNE") bgColor = "#f59e0b";
+          if (p === "HAUTE") bgColor = "#ef4444";
+          
+          return (
+            <TouchableOpacity
+              key={p}
+              style={[
+                styles.typeButton,
+                priorite === p && { backgroundColor: bgColor, borderColor: bgColor }
+              ]}
+              onPress={() => setPriorite(p)}
+            >
+              <Text style={[styles.typeButtonText, priorite === p && styles.activeTypeButtonText]}>
+                {p}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       {/* TYPE POSTE */}
       <Text style={styles.label}>Type Poste</Text>
@@ -355,7 +428,7 @@ export default function CreateTicket() {
       {/* MACHINE SELECTION */}
       {typePoste === "MACHINE" && (
         <View style={styles.machineSection}>
-          <Text style={styles.label}>Sélectionnez la Machine</Text>
+          <Text style={styles.label}>Sélectionnez la Machine en Panne</Text>
 
           <TouchableOpacity 
             style={[styles.submitButton, { backgroundColor: '#10b981', marginTop: 10, marginBottom: 15, padding: 12 }]} 
@@ -368,7 +441,7 @@ export default function CreateTicket() {
             <View style={styles.selectedMachineCard}>
               <View>
                 <Text style={styles.selectedMachineName}>{selectedMachine.nom}</Text>
-                <Text style={styles.selectedMachineSub}>Secteur: {selectedMachine.secteur} | Process: {selectedMachine.process}</Text>
+                <Text style={styles.selectedMachineSub}>Segment: {selectedMachine.secteur} | Process: {selectedMachine.process}</Text>
               </View>
               <TouchableOpacity onPress={() => setSelectedMachine(null)} style={styles.changeButton}>
                 <Text style={{ color: "#005A9C", fontWeight: "bold" }}>Changer</Text>
@@ -398,7 +471,7 @@ export default function CreateTicket() {
                       ]}
                       onPress={() => {
                         if (item.enArret) {
-                          Alert.alert("Machine en panne", "Cette machine est déjà signalée en arrêt dans le système.");
+                          Alert.alert("Machine en arrêt", "Cette machine est déjà signalée en arrêt dans le système.");
                           return;
                         }
                         setSelectedMachine(item);
@@ -425,10 +498,10 @@ export default function CreateTicket() {
         </View>
       )}
 
-      {/* SECTEUR */}
+      {/* SECTEUR -> RENOMMÉ EN SEGMENT */}
       {typePoste !== "" && typePoste !== "MACHINE" && (
         <>
-          <Text style={styles.label}>Secteur</Text>
+          <Text style={styles.label}>Segment d'Intervention</Text>
           {secteursList.map(sec => (
             <TouchableOpacity
               key={sec.id || sec.nom}
@@ -442,6 +515,8 @@ export default function CreateTicket() {
           ))}
         </>
       )}
+
+
 
 
 
@@ -459,7 +534,7 @@ export default function CreateTicket() {
       ))}
 
       {/* DESCRIPTION */}
-      <Text style={styles.label}>Description de la panne</Text>
+      <Text style={styles.label}>Description de l'arrêt</Text>
       <TextInput
         multiline
         style={[styles.input, { height: 100 }]}
@@ -468,7 +543,7 @@ export default function CreateTicket() {
       />
 
       {/* PHOTO */}
-      <Text style={styles.label}>Photo de la panne</Text>
+      <Text style={styles.label}>Photo de l'arrêt</Text>
       <View style={{ flexDirection: "row", justifyContent: "space-around", marginBottom: 15 }}>
         <TouchableOpacity style={styles.imageButton} onPress={pickImage} disabled={isAnalyzing}>
           <Text style={{ color: "white" }}>Galerie</Text>
@@ -505,6 +580,9 @@ export default function CreateTicket() {
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitText}>Envoyer</Text>
       </TouchableOpacity>
+      
+      {/* ESPACE DE SÉCURITÉ EN BAS */}
+      <View style={{ height: 60 }} />
     </ScrollView>
       )}
     </View>

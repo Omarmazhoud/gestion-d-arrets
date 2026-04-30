@@ -12,7 +12,6 @@ import {
     FaTrash, 
     FaCheck, 
     FaSearch, 
-    FaFilter, 
     FaEnvelope, 
     FaIdCard, 
     FaUserTag,
@@ -128,7 +127,7 @@ function Users() {
       {/* HEADER */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "35px" }}>
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#0f172a", margin: 0 }}>Gestion des Utilisateurs</h1>
+          <h1 style={{ fontSize: "28px", fontWeight: "800", color: "var(--primary-bg)", margin: 0 }}>Gestion des Utilisateurs</h1>
           <p style={{ color: "#64748b", margin: "5px 0 0 0" }}>Pilotez les accès et les rôles de vos collaborateurs.</p>
         </div>
         
@@ -136,7 +135,7 @@ function Users() {
           <button
             onClick={handleOpenCreate}
             style={{
-              background: "linear-gradient(135deg, #0f172a, #1e293b)",
+              background: "var(--primary-gradient)",
               color: "white",
               padding: "12px 24px",
               border: "none",
@@ -212,7 +211,7 @@ function Users() {
                       {user.nom?.charAt(0)}
                     </div>
                     <div>
-                      <div style={{ fontWeight: "700", color: "#0f172a" }}>{user.nom}</div>
+                      <div style={{ fontWeight: "700", color: "var(--primary-bg)" }}>{user.nom}</div>
                       <div style={{ fontSize: "12px", color: "#64748b" }}>{user.email}</div>
                     </div>
                   </div>
@@ -266,7 +265,7 @@ function Users() {
         <div style={modalOverlay}>
           <div style={modalContent}>
             <div style={{ marginBottom: "25px" }}>
-                <h3 style={{ margin: 0, fontSize: "20px", fontWeight: "800", color: "#0f172a" }}>
+                <h3 style={{ margin: 0, fontSize: "20px", fontWeight: "800", color: "var(--primary-bg)" }}>
                     {editingId ? "Édition du collaborateur" : "Créer un nouvel accès"}
                 </h3>
                 <p style={{ margin: "5px 0 0 0", color: "#64748b", fontSize: "14px" }}>Remplissez les informations obligatoires.</p>
@@ -316,7 +315,7 @@ function Users() {
 
                 <div style={{ display: "flex", gap: "12px", marginTop: "15px" }}>
                     <button type="button" onClick={() => setShowModal(false)} style={{ ...btnBase, background: "#f1f5f9", color: "#475569" }}>Annuler</button>
-                    <button type="submit" style={{ ...btnBase, background: "#0f172a", color: "white", flex: 2 }}>
+                    <button type="submit" style={{ ...btnBase, background: "var(--primary-bg)", color: "white", flex: 2 }}>
                         {editingId ? "Sauvegarder les modifications" : "Créer le compte"}
                     </button>
                 </div>

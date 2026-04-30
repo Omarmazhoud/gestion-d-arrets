@@ -80,7 +80,7 @@ export default function Login() {
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Image 
-          source={require('../../assets/images/icon.png')} 
+          source={require('../../assets/images/logo.png')} 
           style={styles.logo} 
           resizeMode="contain" 
         />
@@ -129,6 +129,14 @@ const styles = StyleSheet.create({
   logo: {
     width: 320,
     height: 120
+  },
+  logoSubtitle: {
+    fontSize: 28,
+    fontWeight: "900",
+    color: "#005A9C",
+    marginTop: -10,
+    letterSpacing: 3,
+    textTransform: "uppercase"
   },
   formBox: {
     backgroundColor: "#FFFFFF",

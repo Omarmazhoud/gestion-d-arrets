@@ -46,9 +46,8 @@ export default function Login() {
         {/* LOGO & TITLE */}
         <div style={headerSection}>
           <div style={logoContainer}>
-            <img src="/logo.jpg" alt="LEONI Logo" style={logoStyle} />
+            <img src="/logo.png" alt="L-DTM Logo" style={logoStyle} />
           </div>
-          <h2 style={titleStyle}>LEONI Maintenance</h2>
           <p style={subtitleStyle}>Portail d'administration industrielle</p>
         </div>
 
@@ -123,9 +122,10 @@ const containerStyle = {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+  background: "linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%)",
   fontFamily: "'Inter', sans-serif",
 };
+
 
 const loginCard = {
   width: "100%",
@@ -142,8 +142,8 @@ const headerSection = {
 };
 
 const logoContainer = {
-  width: "80px",
-  height: "80px",
+  width: "140px",
+  height: "140px",
   margin: "0 auto 20px",
   background: "#f8fafc",
   padding: "10px",
@@ -158,13 +158,6 @@ const logoStyle = {
   width: "100%",
   height: "100%",
   objectFit: "contain",
-};
-
-const titleStyle = {
-  fontSize: "24px",
-  fontWeight: "800",
-  color: "#0f172a",
-  margin: "0 0 8px 0",
 };
 
 const subtitleStyle = {

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:8080/api/processes";
+const API = "http://172.20.10.2:8080/api/processes";
 
 export const getProcesses = () => axios.get(API);
 

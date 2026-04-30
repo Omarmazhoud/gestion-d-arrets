@@ -204,8 +204,16 @@ export default function InterventionExecuteur() {
         imageIntervention: imageIntervention,
       });
 
-      Alert.alert("Succès", "Intervention envoyée pour vérification.");
-      router.push("/executeur");
+      Alert.alert(
+        "Succès", 
+        "Intervention envoyée pour vérification.",
+        [
+          { 
+            text: "OK", 
+            onPress: () => router.push({ pathname: "/executeur", params: { userId: executeurId } }) 
+          }
+        ]
+      );
 
     } catch (error: any) {
       console.log("Erreur soumission:", error);
@@ -263,16 +271,19 @@ export default function InterventionExecuteur() {
         <Text style={styles.infoLabel}>Date Arrêt: <Text style={styles.infoValue}>{ticket.dateArret || "N/A"}</Text></Text>
         <Text style={styles.infoLabel}>Heure Arrêt: <Text style={styles.infoValue}>{ticket.heureArret || "N/A"}</Text></Text>
         <Text style={styles.infoLabel}>Type Poste: <Text style={styles.infoValue}>{ticket.typePoste || "N/A"}</Text></Text>
-        <Text style={styles.infoLabel}>Secteur: <Text style={styles.infoValue}>{ticket.secteurType || "N/A"}</Text></Text>
-        <Text style={styles.infoLabel}>Description panne: <Text style={styles.infoValue}>{ticket.descriptionPanne || ticket.description}</Text></Text>
+        <Text style={styles.infoLabel}>Segment: <Text style={styles.infoValue}>{ticket.secteurType || "N/A"}</Text></Text>
+        {!!ticket.priorite && (
+          <Text style={styles.infoLabel}>Priorité: <Text style={[styles.infoValue, { color: ticket.priorite === 'HAUTE' ? '#ef4444' : ticket.priorite === 'MOYENNE' ? '#f59e0b' : '#10b981' }]}>{ticket.priorite}</Text></Text>
+        )}
+        <Text style={styles.infoLabel}>Description de l'arrêt: <Text style={styles.infoValue}>{ticket.descriptionPanne || ticket.description}</Text></Text>
 
         {/* IA SUGGESTION */}
-        {ticket.commentaireIa && (
+        {!!ticket.commentaireIa && (
           <View style={styles.iaContainer}>
             <View style={styles.iaHeader}>
               <Ionicons name="hardware-chip-outline" size={20} color="#0284c7" />
               <Text style={styles.iaTitle}> Analyse de l'IA</Text>
-              {ticket.dureeEstimee && (
+              {!!ticket.dureeEstimee && (
                  <View style={styles.durationBadge}>
                    <Ionicons name="time-outline" size={14} color="#fff" />
                    <Text style={styles.durationText}> {ticket.dureeEstimee}h</Text>
@@ -283,9 +294,9 @@ export default function InterventionExecuteur() {
           </View>
         )}
 
-        {ticket.imagePanne && (
+        {!!ticket.imagePanne && (
           <View style={{ marginTop: 15 }}>
-            <Text style={styles.title}>Photo de la panne</Text>
+            <Text style={styles.title}>Photo de l'arrêt</Text>
             <Image 
               source={{ uri: ticket.imagePanne }} 
               style={styles.imageDisplay} 
@@ -418,7 +429,7 @@ export default function InterventionExecuteur() {
                 <Text style={{fontSize: 12, color: imageIntervention ? "green" : "#005A9C"}}>Galerie</Text>
               </TouchableOpacity>
 
-              {imageIntervention && (
+              {!!imageIntervention && (
                 <View style={styles.photoCheck}>
                   <Ionicons name="checkmark-circle" size={24} color="green" />
                   <Text style={{color: "green", fontSize: 12}}>Photo OK</Text>
@@ -426,7 +437,7 @@ export default function InterventionExecuteur() {
               )}
             </View>
 
-            {imageIntervention && (
+            {!!imageIntervention && (
               <View style={{ marginTop: 15, alignItems: "center" }}>
                 <Image 
                   source={{ uri: imageIntervention }} 

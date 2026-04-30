@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
   HiTicket,
   HiExclamationCircle,
@@ -9,60 +8,89 @@ import {
   HiClipboardList,
   HiBadgeCheck
 } from "react-icons/hi";
+import { getStats } from "../../services/statsService";
+import { getTickets } from "../../services/ticketService";
+import { getMachines } from "../../services/machineService";
+import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({});
   const [tickets, setTickets] = useState([]);
+  const [machines, setMachines] = useState([]);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     setUser(storedUser);
-    loadStats();
-    loadTickets();
+    loadData();
     const timer = setInterval(() => {
-      loadStats();
-      loadTickets();
+      loadData();
     }, 30000);
     return () => clearInterval(timer);
   }, []);
 
-  const loadStats = async () => {
+  const loadData = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/stats");
-      setStats(res.data);
+      const statsData = await getStats();
+      setStats(statsData);
+
+      const ticketsRes = await getTickets();
+      setTickets(ticketsRes.data || ticketsRes);
+
+      const machinesRes = await getMachines();
+      setMachines(machinesRes.data || machinesRes);
     } catch (e) {
-      console.error("Error loading stats", e);
+      console.error("Error loading dashboard data", e);
     }
   };
 
-  const loadTickets = async () => {
-    try {
-      const res = await axios.get("http://localhost:8080/api/tickets");
-      setTickets(res.data);
-    } catch (e) {
-      console.error("Error loading tickets", e);
-    }
+  // Calculs pour l'analyse
+  const machinesEnArret = machines.filter(m => m.enArret).length;
+  const machinesOperationnelles = machines.length - machinesEnArret;
+
+  const ticketsOuverts = tickets.filter(t => t.statut === "OUVERTE").length;
+  const ticketsEnCours = tickets.filter(t => t.statut === "EN_COURS").length;
+  const ticketsFermes = tickets.filter(t => t.statut === "FERMEE").length;
+  
+  const pieData = {
+    labels: ["Ouverts", "En Cours", "Fermés"],
+    datasets: [
+      {
+        data: [ticketsOuverts, ticketsEnCours, ticketsFermes],
+        backgroundColor: ["#ef4444", "#f59e0b", "#22c55e"],
+        borderWidth: 0
+      }
+    ]
+  };
+
+  const pieOptions = {
+    plugins: {
+      legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+    },
+    maintainAspectRatio: false
   };
 
   const dashboardCards = [
     {
       title: "Parc Machines",
-      value: stats.totalMachines || 0,
+      value: machines.length || 0,
       icon: <HiCog />,
       color: "#2563eb",
       subtitle: "Total actifs"
     },
     {
       title: "Total Tickets",
-      value: stats.totalTickets || 0,
+      value: tickets.length || 0,
       icon: <HiTicket />,
       color: "#1e293b",
       subtitle: "Historique"
     },
     {
       title: "Tickets Ouverts",
-      value: stats.ticketsOuverts || 0,
+      value: ticketsOuverts || 0,
       icon: <HiExclamationCircle />,
       color: "#ef4444",
       subtitle: "Urgent"
@@ -84,7 +112,7 @@ export default function AdminDashboard() {
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           <div style={welcomeIcon}><HiCollection size={30} /></div>
           <div>
-            <h2 style={{ margin: 0, fontSize: "22px", fontWeight: "800" }}>Centre de Contrôle LEONI Admin</h2>
+            <h2 style={{ margin: 0, fontSize: "22px", fontWeight: "800" }}>Centre de Contrôle L-DTM Admin</h2>
             <p style={{ margin: "4px 0 0 0", opacity: 0.9 }}>Bienvenue, {user?.nom}. Supervision en temps réel de votre secteur.</p>
           </div>
         </div>
@@ -129,7 +157,7 @@ export default function AdminDashboard() {
                   <th style={thStyle}>ID</th>
                   <th style={thStyle}>Description</th>
                   <th style={thStyle}>Statut</th>
-                  <th style={thStyle}>Machine</th>
+                  <th style={thStyle}>Poste</th>
                 </tr>
               </thead>
               <tbody>
@@ -141,9 +169,17 @@ export default function AdminDashboard() {
                       <span style={statusBadge(ticket.statut)}>
                         {ticket.statut}
                       </span>
+                      {ticket.priorite === "HAUTE" && (
+                        <span style={{ marginLeft: "8px", fontSize: "16px" }} title="Priorité Haute">🔥</span>
+                      )}
                     </td>
                     <td style={tdStyle}>
-                      <span style={machineTag}>{ticket.machine?.nom || "Non spécifié"}</span>
+                      <span style={machineTag}>
+                        {ticket.typePoste === "MACHINE" 
+                          ? `Machine: ${ticket.machine?.nom || "Non spécifié"}`
+                          : (ticket.typePoste || "Non spécifié")
+                        }
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -160,20 +196,28 @@ export default function AdminDashboard() {
             </div>
             <div style={summaryItem}>
               <span>Tickets Ouverts</span>
-              <strong style={{ color: "#ef4444" }}>{stats.ticketsOuverts || 0}</strong>
+              <strong style={{ color: "#ef4444" }}>{ticketsOuverts}</strong>
             </div>
             <div style={summaryItem}>
               <span>En Cours d'intervention</span>
-              <strong style={{ color: "#f59e0b" }}>{stats.ticketsEnCours || 0}</strong>
+              <strong style={{ color: "#f59e0b" }}>{ticketsEnCours}</strong>
             </div>
             <div style={summaryItem}>
               <span>Machines opérationnelles</span>
-              <strong style={{ color: "#22c55e" }}>--</strong>
+              <strong style={{ color: "#22c55e" }}>
+                {machines.length > 0 ? `${machinesOperationnelles} / ${machines.length}` : "--"}
+              </strong>
             </div>
             <div style={summarySeparator}></div>
+            
+            {/* GRAPHIQUE */}
+            <div style={{ height: "200px", marginBottom: "20px" }}>
+              <Pie data={pieData} options={pieOptions} />
+            </div>
+
             <div style={statQuote}>
               <HiBadgeCheck color="#22c55e" size={20} />
-              <span>Parc machine sous contrôle.</span>
+              <span>{machinesOperationnelles === machines.length && machines.length > 0 ? "Parc machine sous contrôle." : "Interventions nécessaires en cours."}</span>
             </div>
           </div>
         </div>
@@ -188,7 +232,7 @@ export default function AdminDashboard() {
 const containerStyle = { width: "100%" };
 
 const welcomeBanner = {
-  background: "linear-gradient(135deg, #0f172a 0%, #2563eb 100%)",
+  background: "linear-gradient(135deg, var(--primary-bg) 0%, var(--accent-blue) 100%)",
   color: "white",
   padding: "32px",
   borderRadius: "24px",
@@ -247,7 +291,7 @@ const cardTitle = {
 const cardValue = {
   fontSize: "28px",
   fontWeight: "800",
-  color: "#0f172a",
+  color: "var(--primary-bg)",
   margin: 0,
 };
 
@@ -297,7 +341,7 @@ const sectionHeader = {
 const sectionTitle = {
   fontSize: "18px",
   fontWeight: "700",
-  color: "#0f172a",
+  color: "var(--primary-bg)",
   margin: 0,
 };
 

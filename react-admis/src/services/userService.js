@@ -1,7 +1,4 @@
 import api from "./api";
-import axios from "axios";
-const API = "http://localhost:8080/api/users";
-
 export const getUsers = async () => {
     const response = await api.get("/utilisateurs");
     return response.data;

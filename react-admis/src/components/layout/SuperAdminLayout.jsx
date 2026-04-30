@@ -1,13 +1,13 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { 
-  HiChartPie, 
-  HiUsers, 
-  HiTicket, 
-  HiPlusCircle, 
-  HiPresentationChartLine, 
-  HiCog, 
-  HiOfficeBuilding, 
+import {
+  HiChartPie,
+  HiUsers,
+  HiTicket,
+  HiPlusCircle,
+  HiPresentationChartLine,
+  HiCog,
+  HiOfficeBuilding,
   HiAdjustments,
   HiLogout,
   HiTruck,
@@ -26,10 +26,10 @@ export default function SuperAdminLayout() {
       navigate("/");
     } else {
       setUser(storedUser);
-      
+
       // Heartbeat (Ping) toutes les 45 secondes
       const pingInterval = setInterval(() => {
-        fetch(`http://localhost:8080/api/auth/ping/${storedUser.id}`, { method: 'POST' })
+        fetch(`http://192.168.0.100:8080/api/auth/ping/${storedUser.id}`, { method: 'POST' })
           .catch(err => console.error("Ping error", err));
       }, 45000);
 
@@ -40,7 +40,7 @@ export default function SuperAdminLayout() {
   const logout = async () => {
     if (user && user.id) {
       try {
-        await fetch(`http://localhost:8080/api/auth/logout/${user.id}`, { method: 'POST' });
+        await fetch(`http://192.168.0.100:8080/api/auth/logout/${user.id}`, { method: 'POST' });
       } catch (error) {
         console.error("Logout error:", error);
       }
@@ -56,28 +56,29 @@ export default function SuperAdminLayout() {
     padding: "12px 20px",
     borderRadius: "12px",
     textDecoration: "none",
-    color: isActive ? "#fff" : "#94a3b8",
-    background: isActive ? "#2563eb" : "transparent",
+    color: isActive ? "#fff" : "rgba(255, 255, 255, 0.7)",
+    background: isActive ? "var(--accent-blue)" : "transparent",
     fontWeight: isActive ? "600" : "500",
     transition: "all 0.2s ease",
     marginBottom: "4px",
     boxShadow: isActive ? "0 4px 12px rgba(37, 99, 235, 0.3)" : "none",
+
   });
 
   return (
     <div style={{ display: "flex", height: "100vh", backgroundColor: "#f8fafc" }}>
-      
+
       {/* SIDEBAR */}
       <aside style={sidebarStyle}>
         <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
           {/* BRAND/LOGO */}
           <div style={brandBox}>
             <div style={logoWrapper}>
-              <img src="/logo.jpg" alt="Logo" style={logoImage} />
+              <img src="/logo.png" alt="Logo" style={logoImage} />
             </div>
             <div style={{ marginTop: "10px" }}>
               <div style={{ fontSize: "10px", fontWeight: "700", color: "#38bdf8", textTransform: "uppercase", letterSpacing: "1px" }}>Entreprise</div>
-              <h4 style={brandTitle}>LEONI</h4>
+              <h4 style={brandTitle}>L-DTM</h4>
             </div>
             <div style={separator}></div>
           </div>
@@ -111,7 +112,7 @@ export default function SuperAdminLayout() {
               <HiAdjustments size={20} /> Processes
             </NavLink>
             <NavLink to="/super-admin/secteurs" style={navLinkStyle}>
-              <HiOfficeBuilding size={20} /> Secteurs
+              <HiOfficeBuilding size={20} /> Segments
             </NavLink>
             <NavLink to="/super-admin/fournisseurs" style={navLinkStyle}>
               <HiTruck size={20} /> Fournisseurs
@@ -161,8 +162,9 @@ export default function SuperAdminLayout() {
 
 const sidebarStyle = {
   width: "280px",
-  background: "#0f172a", // Darker blue slate
-  color: "#f1f5f9",
+  background: "var(--primary-bg)",
+  color: "var(--sidebar-text)",
+
   padding: "24px 16px",
   display: "flex",
   flexDirection: "column",
@@ -219,7 +221,8 @@ const navContainer = {
 const menuGroupLabel = {
   fontSize: "11px",
   fontWeight: "700",
-  color: "#475569",
+  color: "rgba(255, 255, 255, 0.4)",
+
   letterSpacing: "1.5px",
   marginTop: "20px",
   marginBottom: "8px",
@@ -233,9 +236,10 @@ const bottomSection = {
 };
 
 const userCard = {
-  background: "rgba(30, 41, 59, 0.5)",
+  background: "rgba(255, 255, 255, 0.1)",
   padding: "12px",
   borderRadius: "16px",
+
   display: "flex",
   alignItems: "center",
   gap: "12px",

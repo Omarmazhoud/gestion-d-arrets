@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import joblib
 
 app = Flask(__name__)
+CORS(app) # Autoriser les requêtes Cross-Origin (Web)
 
 
 
@@ -157,8 +159,23 @@ def predict_panne_image():
             })
 
         predicted_class = labels_cv[max_index]
+
+        # MAPPING : Traduire les labels Kaggle vers vos types d'arrêts
+        mapping_kaggle = {
+            "Scratches": "mecanique",
+            "Pitted Surface": "mecanique",
+            "Crazing": "mecanique",
+            "Inclusion": "qualite",
+            "Patches": "qualite",
+            "Rolled-in Scale": "process"
+        }
+
+        # Utiliser le mapping si possible, sinon garder le label d'origine
+        final_panne = mapping_kaggle.get(predicted_class, predicted_class)
+
         return jsonify({
-            'type_panne': predicted_class,
+            'type_panne': final_panne,
+            'label_origine': predicted_class,
             'confidence': confidence
         })
     except Exception as e:

@@ -76,7 +76,7 @@ export default function Messagerie() {
           <FaUsers size={24} />
         </div>
         <div>
-          <h2 style={{ margin: 0, fontSize: "18px", color: "#0f172a" }}>Groupe Général de passation</h2>
+          <h2 style={{ margin: 0, fontSize: "18px", color: "var(--primary-bg)" }}>Groupe Général de passation</h2>
           <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>Admin, Super Admin, Exécuteurs</p>
         </div>
       </div>

@@ -183,7 +183,7 @@ export default function PiecesRechange() {
             {filtered.map(p => (
               <tr key={p.id} style={{ borderBottom: "1px solid #f1f5f9", transition: "background 0.2s" }}>
                 <td style={{ padding: "16px 24px", color: "#64748b", fontFamily: "monospace", fontWeight: "700" }}>{p.reference}</td>
-                <td style={{ padding: "16px 24px", color: "#0f172a", fontWeight: "700" }}>{p.nom}</td>
+                <td style={{ padding: "16px 24px", color: "var(--primary-bg)", fontWeight: "700" }}>{p.nom}</td>
                 <td style={{ padding: "16px 24px" }}>
                   <div style={{ 
                     padding: "6px 12px", 
@@ -241,7 +241,7 @@ export default function PiecesRechange() {
       {showModal && isSuperAdmin && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 2000, backdropFilter: "blur(4px)" }}>
           <div style={{ background: "white", padding: "35px", borderRadius: "24px", width: "450px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)" }}>
-            <h3 style={{ margin: 0, fontSize: "22px", fontWeight: "800", color: "#0f172a" }}>{editingId ? "Modifier Article" : "Nouvel Article"}</h3>
+            <h3 style={{ margin: 0, fontSize: "22px", fontWeight: "800", color: "var(--primary-bg)" }}>{editingId ? "Modifier Article" : "Nouvel Article"}</h3>
             <p style={{ color: "#64748b", fontSize: "14px", marginTop: "5px", marginBottom: "30px" }}>Gestion d'inventaire pièce de rechange.</p>
             
             <div className="row g-3">
@@ -286,7 +286,7 @@ export default function PiecesRechange() {
       {showQrModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.7)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
           <div style={{ background: "white", padding: "40px", borderRadius: "28px", width: "400px", textAlign: "center", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}>
-            <h3 style={{ marginBottom: "25px", fontSize: "20px", fontWeight: "800", color: "#0f172a" }}>{qrTitle}</h3>
+            <h3 style={{ marginBottom: "25px", fontSize: "20px", fontWeight: "800", color: "var(--primary-bg)" }}>{qrTitle}</h3>
             
             <div style={{ display: "flex", justifyContent: "center", padding: "25px", background: "#f8fafc", borderRadius: "20px", marginBottom: "25px", border: "2px solid #f1f5f9" }}>
               <QRCodeCanvas 
@@ -300,7 +300,7 @@ export default function PiecesRechange() {
             <div style={{ display: "flex", gap: "12px", flexDirection: "column" }}>
               <button 
                 onClick={handleDownloadQr} 
-                style={{ background: "#0f172a", color: "white", padding: "14px", border: "none", borderRadius: "14px", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}
+                style={{ background: "var(--primary-bg)", color: "white", padding: "14px", border: "none", borderRadius: "14px", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}
               >
                 <HiDownload size={20} /> Télécharger Image QR
               </button>

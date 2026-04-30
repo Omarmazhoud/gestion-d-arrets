@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/notifications-pieces';
+const API_URL = 'http://172.20.10.2:8080/api/notifications-pieces';
 
 export const getNotificationsPiece = () => axios.get(API_URL);
 export const getAllNotificationsPiece = () => axios.get(`${API_URL}/all`);
