@@ -23,7 +23,7 @@ public class DataInitializer {
                 admin.setActif(true); // Déjà validé
                 admin.setMatricule("0000");
                 repository.save(admin);
-                System.out.println("✅ Compte Super Admin créé avec succès : admin@leoni.com / admin");
+                System.out.println("Compte Super Admin créé avec succès : admin@leoni.com / admin");
             }
         };
     }

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://172.20.10.2:8080/api/pieces-rechange';
+const API_URL = 'https://l-dtm-leoni.onrender.com/api/pieces-rechange';
 
 export const getPiecesRechange = () => axios.get(API_URL);
 export const createPieceRechange = (data) => axios.post(API_URL, data);

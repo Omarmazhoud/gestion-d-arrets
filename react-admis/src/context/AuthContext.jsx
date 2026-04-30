@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     if (user && user.id) {
       try {
-        await fetch(`http://172.20.10.2:8080/api/auth/logout/${user.id}`, { method: 'POST' });
+        await fetch(`https://l-dtm-leoni.onrender.com/api/auth/logout/${user.id}`, { method: 'POST' });
       } catch (error) {
         console.error("Erreur déconnexion:", error);
       }
