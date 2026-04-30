@@ -20,6 +20,8 @@ public class MailService {
     @org.springframework.beans.factory.annotation.Value("${spring.mail.username}")
     private String fromEmail;
 
+    private final JavaMailSender mailSender;
+
     public MailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
