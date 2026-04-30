@@ -12,6 +12,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -24,9 +26,19 @@ public class FcmService {
     @PostConstruct
     public void initialize() {
         try {
+            String firebaseConfig = System.getenv("FIREBASE_CONFIG");
+            InputStream serviceAccount;
+
+            if (firebaseConfig != null && !firebaseConfig.isEmpty()) {
+                System.out.println("Initializing Firebase with environment variable FIREBASE_CONFIG");
+                serviceAccount = new ByteArrayInputStream(firebaseConfig.getBytes());
+            } else {
+                System.out.println("Initializing Firebase with local file firebase-service-account.json");
+                serviceAccount = new ClassPathResource("firebase-service-account.json").getInputStream();
+            }
+
             FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(
-                            new ClassPathResource("firebase-service-account.json").getInputStream()))
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
 
             if (FirebaseApp.getApps().isEmpty()) {
