@@ -1,11 +1,12 @@
 # Stage 1: Build with Maven
 FROM maven:3.8.4-openjdk-17-slim AS build
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
+# On indique le chemin relatif depuis la racine du dépôt GitHub
+COPY springboot/demo/pom.xml .
+COPY springboot/demo/src ./src
 RUN mvn clean package -DskipTests
 
-# Stage 2: Run with Eclipse Temurin (more stable than openjdk)
+# Stage 2: Run with Eclipse Temurin
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
