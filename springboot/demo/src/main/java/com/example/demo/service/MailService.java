@@ -17,7 +17,8 @@ import jakarta.mail.MessagingException;
 @Service
 public class MailService {
 
-    private final JavaMailSender mailSender;
+    @org.springframework.beans.factory.annotation.Value("${spring.mail.username}")
+    private String fromEmail;
 
     public MailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -32,7 +33,7 @@ public class MailService {
 
         helper.setTo(utilisateur.getEmail());
         helper.setSubject("✅ Votre compte LEONI est activé");
-        helper.setFrom("tonemail@gmail.com", "LEONI Support");
+        helper.setFrom(fromEmail, "LEONI Support");
 
         String htmlContent =
                 "<div style='font-family:Arial;'>"
