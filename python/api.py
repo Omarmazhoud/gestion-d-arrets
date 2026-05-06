@@ -19,6 +19,10 @@ except:
 
 # Charger le modèle Computer Vision
 try:
+    import os
+    os.environ['TF_USE_LEGACY_KERAS'] = '1'
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # Désactiver logs inutiles
+
     import tensorflow as tf
     from tensorflow.keras.models import load_model
     from tensorflow.keras.preprocessing.image import img_to_array
@@ -27,10 +31,6 @@ try:
     import base64
     import numpy as np
     import pickle
-
-    # Désactiver les logs inutiles de TF pour économiser de la RAM
-    import os
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
     # Charger le modèle sans compilation (règle les erreurs de BatchNormalization)
     model_cv = load_model("modele_panne_cv.h5", compile=False)
