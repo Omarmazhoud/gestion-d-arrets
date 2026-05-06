@@ -32,7 +32,7 @@ try:
     import pickle
 
     # Charger le modèle sans compilation (règle les erreurs de BatchNormalization)
-    model_cv = load_model("modele_panne_cv.h5", compile=False)
+    model_cv = load_model("modele_panne_cv.keras", compile=False)
     
     with open("labels_cv.pkl", "rb") as f:
         labels_cv = pickle.load(f)
