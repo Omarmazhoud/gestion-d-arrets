@@ -59,6 +59,7 @@ public class MailService {
         helper.setText(htmlContent, true);
 
         mailSender.send(message);
+        System.out.println("✅ DEBUG: L'EMAIL A ÉTÉ REMIS AVEC SUCCÈS AU SERVEUR SMTP !");
 
     } catch (MessagingException | UnsupportedEncodingException | MailException e) {
         System.err.println("ERREUR LORS DE L'ENVOI DU MAIL : " + e.getMessage());

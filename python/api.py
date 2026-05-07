@@ -30,12 +30,33 @@ try:
     import base64
     import numpy as np
     import pickle
+    import os
 
-    # Charger le modèle sans compilation (règle les erreurs de BatchNormalization)
-    model_cv = load_model("modele_panne_cv.keras", compile=False)
+    # --- PATCH RADICAL POUR RENDRE L'IA ROBUSTE (RÈGLE L'ERREUR RENORM) ---
+    original_init = tf.keras.layers.BatchNormalization.__init__
+    def safe_init(self, **kwargs):
+        kwargs.pop('renorm', None)
+        kwargs.pop('renorm_clipping', None)
+        kwargs.pop('renorm_momentum', None)
+        kwargs.pop('synchronized', None)
+        return original_init(self, **kwargs)
+    tf.keras.layers.BatchNormalization.__init__ = safe_init
+
+    print("IA : Tentative de chargement du modèle .keras avec Patch...")
+    try:
+        model_cv = load_model("modele_panne_cv.keras", compile=False)
+        print("IA : ✅ MODÈLE CHARGÉ AVEC SUCCÈS")
+    except Exception as e:
+        print(f"IA : ❌ ERREUR CRITIQUE CHARGEMENT : {str(e)}")
+        model_cv = None
     
-    with open("labels_cv.pkl", "rb") as f:
-        labels_cv = pickle.load(f)
+    try:
+        with open("labels_cv.pkl", "rb") as f:
+            labels_cv = pickle.load(f)
+        print("IA : ✅ LABELS CHARGÉS")
+    except Exception as e:
+        print(f"IA : ❌ ERREUR CHARGEMENT LABELS : {str(e)}")
+        labels_cv = None
         
     has_cv_model = True
     print("✅ Modèle Computer Vision chargé avec succès (mode optimisé).")
