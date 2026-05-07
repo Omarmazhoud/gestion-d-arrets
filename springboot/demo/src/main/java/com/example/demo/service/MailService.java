@@ -27,7 +27,7 @@ public class MailService {
     }
 
     public void envoyerValidationCompte(Utilisateur utilisateur) {
-
+        System.out.println("DEBUG: Démarrage de l'envoi de l'email de validation pour: " + utilisateur.getEmail());
     try {
 
         MimeMessage message = mailSender.createMimeMessage();
