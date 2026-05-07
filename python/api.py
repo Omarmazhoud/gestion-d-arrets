@@ -32,17 +32,20 @@ try:
     import pickle
     import os
 
-    # --- PATCH RADICAL POUR RENDRE L'IA ROBUSTE (RÈGLE L'ERREUR RENORM) ---
-    original_init = tf.keras.layers.BatchNormalization.__init__
-    def safe_init(self, **kwargs):
-        kwargs.pop('renorm', None)
-        kwargs.pop('renorm_clipping', None)
-        kwargs.pop('renorm_momentum', None)
-        kwargs.pop('synchronized', None)
-        return original_init(self, **kwargs)
-    tf.keras.layers.BatchNormalization.__init__ = safe_init
+    # --- PATCH RADICAL POUR RENDRE L'IA ROBUSTE (RÈGLE LES ERREURS RENORM ET QUANTIZATION) ---
+    def patch_layer(layer_class, params_to_remove):
+        original_init = layer_class.__init__
+        def safe_init(self, **kwargs):
+            for p in params_to_remove:
+                kwargs.pop(p, None)
+            return original_init(self, **kwargs)
+        layer_class.__init__ = safe_init
 
-    print("IA : Tentative de chargement du modèle .keras avec Patch...")
+    patch_layer(tf.keras.layers.BatchNormalization, ['renorm', 'renorm_clipping', 'renorm_momentum', 'synchronized'])
+    patch_layer(tf.keras.layers.Dense, ['quantization_config'])
+    patch_layer(tf.keras.layers.Conv2D, ['quantization_config', 'groups'])
+
+    print("IA : Tentative de chargement du modèle .keras avec Patch Global...")
     try:
         model_cv = load_model("modele_panne_cv.keras", compile=False)
         print("IA : ✅ MODÈLE CHARGÉ AVEC SUCCÈS")
