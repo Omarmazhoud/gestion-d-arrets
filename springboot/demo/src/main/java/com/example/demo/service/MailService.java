@@ -27,9 +27,15 @@ public class MailService {
     }
 
     public void envoyerValidationCompte(Utilisateur utilisateur) {
-        System.out.println("DEBUG: Démarrage de l'envoi de l'email de validation pour: " + utilisateur.getEmail());
-    try {
+        System.out.println("DEBUG: Tentative d'envoi d'email à: " + utilisateur.getEmail());
+        System.out.println("DEBUG: Expéditeur configuré (fromEmail): " + fromEmail);
 
+        if (fromEmail == null || fromEmail.isEmpty() || fromEmail.contains("${")) {
+            System.err.println("❌ ERREUR CRITIQUE : La variable MAIL_USERNAME n'est pas configurée dans Render !");
+            return;
+        }
+
+    try {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 

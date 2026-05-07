@@ -59,10 +59,6 @@ public class UtilisateurService {
 
         Utilisateur user = findById(id);
 
-        if (user.isActif()) {
-            throw new RuntimeException("Compte déjà activé");
-        }
-
         user.setActif(true);
         Utilisateur saved = utilisateurRepository.save(user);
 
