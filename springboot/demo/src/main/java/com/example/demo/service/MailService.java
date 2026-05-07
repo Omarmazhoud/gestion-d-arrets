@@ -10,6 +10,7 @@ import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
@@ -26,6 +27,7 @@ public class MailService {
         this.mailSender = mailSender;
     }
 
+    @Async
     public void envoyerValidationCompte(Utilisateur utilisateur) {
         System.out.println("📬 [MAIL] Début envoyerValidationCompte pour : " + utilisateur.getEmail());
         System.out.println("📬 [MAIL] Expéditeur (spring.mail.username) : " + fromEmail);
@@ -68,5 +70,4 @@ public class MailService {
             e.printStackTrace();
         }
     }
-
 }
