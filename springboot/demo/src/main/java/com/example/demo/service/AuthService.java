@@ -20,9 +20,16 @@ public class AuthService {
 
     public Utilisateur register(Utilisateur utilisateur) {
         if (utilisateur.getEmail() != null) {
-            utilisateur.setEmail(utilisateur.getEmail().trim().toLowerCase());
+            String email = utilisateur.getEmail().trim().toLowerCase();
+            utilisateur.setEmail(email);
+            
+            // Check if email already exists for a non-deleted user
+            if (utilisateurRepository.findFirstByEmailIgnoreCaseAndDeletedFalse(email).isPresent()) {
+                throw new RuntimeException("Cet email est déjà utilisé");
+            }
         }
         utilisateur.setActif(false); // en attente validation
+        utilisateur.setDeleted(false);
         return utilisateurRepository.save(utilisateur);
     }
 
@@ -30,9 +37,9 @@ public class AuthService {
         String normalizedEmail = (email != null) ? email.trim().toLowerCase() : "";
         System.out.println("DEBUG: Tentative de login pour l'email: [" + normalizedEmail + "]");
 
-        Utilisateur user = utilisateurRepository.findByEmailIgnoreCase(normalizedEmail)
+        Utilisateur user = utilisateurRepository.findFirstByEmailIgnoreCaseAndDeletedFalse(normalizedEmail)
                 .orElseThrow(() -> {
-                    System.out.println("DEBUG: Utilisateur non trouvé pour [" + normalizedEmail + "]");
+                    System.out.println("DEBUG: Utilisateur non trouvé ou supprimé pour [" + normalizedEmail + "]");
                     return new RuntimeException("Email incorrect");
                 });
 

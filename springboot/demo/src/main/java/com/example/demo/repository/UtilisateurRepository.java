@@ -8,6 +8,7 @@ import com.example.demo.model.entity.Utilisateur;
 
 public interface UtilisateurRepository extends JpaRepository<Utilisateur, String> {
 
+    Optional<Utilisateur> findFirstByEmailIgnoreCaseAndDeletedFalse(String email);
     Optional<Utilisateur> findByEmailIgnoreCase(String email);
     
     java.util.List<Utilisateur> findByDeletedFalse();

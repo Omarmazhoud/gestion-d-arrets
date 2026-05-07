@@ -24,6 +24,8 @@ public class GlobalExceptionHandler {
             status = HttpStatus.FORBIDDEN;
         } else if (ex.getMessage().contains("introuvable")) {
             status = HttpStatus.NOT_FOUND;
+        } else if (ex.getMessage().contains("déjà utilisé")) {
+            status = HttpStatus.CONFLICT;
         }
 
         return new ResponseEntity<>(response, status);
