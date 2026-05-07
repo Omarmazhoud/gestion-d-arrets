@@ -95,9 +95,17 @@ function Users() {
   };
 
   const handleValidate = async (id) => {
+    alert("1. Clic détecté pour l'ID : " + id);
     if (window.confirm("Valider ce compte utilisateur ?")) {
-        await validateUser(id);
-        loadUsers();
+        try {
+            alert("2. Tentative d'appel API...");
+            const res = await validateUser(id);
+            alert("3. Succès API : " + JSON.stringify(res));
+            loadUsers();
+        } catch (err) {
+            alert("❌ Erreur API : " + (err.response?.data?.message || err.message));
+            console.error(err);
+        }
     }
   };
 
