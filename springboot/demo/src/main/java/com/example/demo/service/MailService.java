@@ -18,7 +18,7 @@ import jakarta.mail.MessagingException;
 @Service
 public class MailService {
 
-    @org.springframework.beans.factory.annotation.Value("${spring.mail.username}")
+    @org.springframework.beans.factory.annotation.Value("${spring.mail.from:admin@leoni.com}")
     private String fromEmail;
 
     private final JavaMailSender mailSender;
