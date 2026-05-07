@@ -53,6 +53,7 @@ public class UtilisateurController {
     // 🔥 VALIDATION (IMPORTANT)
     @PutMapping("/{id}/valider")
     public Utilisateur validateUser(@PathVariable String id) {
+        System.out.println("🚀 [CONTROLLER] Requête de validation reçue pour l'ID: " + id);
         return utilisateurService.validerCompte(id);
     }
 

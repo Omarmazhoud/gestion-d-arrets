@@ -56,11 +56,12 @@ public class UtilisateurService {
     // VALIDATION ADMIN
     // =========================
     public Utilisateur validerCompte(String id) {
-
+        System.out.println("🔧 [SERVICE] Début validation pour l'utilisateur ID: " + id);
         Utilisateur user = findById(id);
 
         user.setActif(true);
         Utilisateur saved = utilisateurRepository.save(user);
+        System.out.println("🔧 [SERVICE] Utilisateur activé en DB. Appel de MailService...");
 
         mailService.envoyerValidationCompte(saved);
 
