@@ -14,7 +14,7 @@ try:
     le_exec_duree = joblib.load("le_exec_duree.pkl")
     has_duree_model = True
 except:
-    print("⚠️ Modèle de durée non trouvé. Il sera disponible après le premier entraînement.")
+    print("[WARNING] Modele de duree non trouve. Il sera disponible apres le premier entrainement.")
     has_duree_model = False
 
 # Charger le modèle Computer Vision
@@ -48,24 +48,24 @@ try:
     print("IA : Tentative de chargement du modèle .keras avec Patch Global...")
     try:
         model_cv = load_model("modele_panne_cv.keras", compile=False)
-        print("IA : ✅ MODÈLE CHARGÉ AVEC SUCCÈS")
+        print("IA : [OK] MODELE CHARGE AVEC SUCCES")
     except Exception as e:
-        print(f"IA : ❌ ERREUR CRITIQUE CHARGEMENT : {str(e)}")
+        print(f"IA : [ERROR] ERREUR CRITIQUE CHARGEMENT : {str(e)}")
         model_cv = None
     
     try:
         with open("labels_cv.pkl", "rb") as f:
             labels_cv = pickle.load(f)
-        print("IA : ✅ LABELS CHARGÉS")
+        print("IA : [OK] LABELS CHARGES")
     except Exception as e:
-        print(f"IA : ❌ ERREUR CHARGEMENT LABELS : {str(e)}")
+        print(f"IA : [ERROR] ERREUR CHARGEMENT LABELS : {str(e)}")
         labels_cv = None
         
     has_cv_model = True
-    print("✅ Modèle Computer Vision chargé avec succès (mode optimisé).")
+    print("[OK] Modele Computer Vision charge avec succes (mode optimise).")
 except Exception as e:
     import traceback
-    print(f"❌ ERREUR CRITIQUE CHARGEMENT IA : {str(e)}")
+    print(f"[ERROR] ERREUR CRITIQUE CHARGEMENT IA : {str(e)}")
     traceback.print_exc()
     has_cv_model = False
 
@@ -193,14 +193,14 @@ def predict_panne_image():
 
         predicted_class = labels_cv[max_index]
 
-        # MAPPING : Traduire les labels Kaggle vers vos types d'arrêts
+        # MAPPING : Traduire les labels Kaggle vers vos types d'arrêts de l'enum TypePanne
         mapping_kaggle = {
             "Scratches": "mecanique",
             "Pitted Surface": "mecanique",
             "Crazing": "mecanique",
-            "Inclusion": "qualite",
-            "Patches": "qualite",
-            "Rolled-in Scale": "process"
+            "Inclusion": "defaut_fabrication",
+            "Patches": "defaut_fabrication",
+            "Rolled-in Scale": "probleme_process"
         }
 
         # Utiliser le mapping si possible, sinon garder le label d'origine
