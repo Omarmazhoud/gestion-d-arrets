@@ -88,7 +88,7 @@ export default function HomeDemandeur() {
             <Text style={styles.subtitle}>Espace Demandeur</Text>
             <Text style={styles.title}>Tableau de Bord</Text>
           </View>
-          <TouchableOpacity onPress={() => router.push("/demandeur/notifications")} style={styles.iconBtn}>
+          <TouchableOpacity onPress={() => router.push({ pathname: "/demandeur/notifications", params: { userId } })} style={styles.iconBtn}>
             <View>
               <Ionicons name="notifications" size={26} color="#005A9C" />
               {notifCount > 0 && (

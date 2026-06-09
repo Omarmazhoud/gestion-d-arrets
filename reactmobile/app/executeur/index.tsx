@@ -135,7 +135,7 @@ export default function HomeExecuteur() {
             <Text style={styles.subtitle}>Espace Exécuteur</Text>
             <Text style={styles.title}>Interventions</Text>
           </View>
-          <TouchableOpacity onPress={() => router.push("/executeur/notifications")} style={styles.iconBtn}>
+          <TouchableOpacity onPress={() => router.push({ pathname: "/executeur/notifications", params: { userId: executeurId } })} style={styles.iconBtn}>
             <View>
               <Ionicons name="notifications" size={26} color="#005A9C" />
               {notifCount > 0 && (
