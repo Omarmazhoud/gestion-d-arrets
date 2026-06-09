@@ -487,6 +487,33 @@ public class TicketPanneService {
         if (data.getCommentaireIntervention() != null) ticket.setCommentaireIntervention(data.getCommentaireIntervention());
         if (data.getCommentaireVerification() != null) ticket.setCommentaireVerification(data.getCommentaireVerification());
         if (data.getDuree() != null) ticket.setDuree(data.getDuree());
+        if (data.getPriorite() != null) ticket.setPriorite(data.getPriorite());
+        if (data.getTypePoste() != null) ticket.setTypePoste(data.getTypePoste());
+        if (data.getSecteurType() != null) ticket.setSecteurType(data.getSecteurType());
+
+        // Mettre à jour la Machine et gérer son état 'enArret'
+        if (data.getMachine() != null) {
+            Machine oldMachine = ticket.getMachine();
+            Machine newMachine = data.getMachine();
+            if (oldMachine == null || !oldMachine.getId().equals(newMachine.getId())) {
+                if (ticket.getStatut() != TicketStatus.FERMEE && oldMachine != null) {
+                    oldMachine.setEnArret(false);
+                    machineRepo.save(oldMachine);
+                }
+                if (ticket.getStatut() != TicketStatus.FERMEE) {
+                    newMachine.setEnArret(true);
+                    machineRepo.save(newMachine);
+                }
+                ticket.setMachine(newMachine);
+            }
+        } else if (ticket.getMachine() != null && data.getTypePoste() != null && data.getTypePoste() != TypePoste.MACHINE) {
+            if (ticket.getStatut() != TicketStatus.FERMEE) {
+                Machine oldMachine = ticket.getMachine();
+                oldMachine.setEnArret(false);
+                machineRepo.save(oldMachine);
+            }
+            ticket.setMachine(null);
+        }
 
         // Update Demandeur (if ID provided)
         if (data.getDemandeur() != null && data.getDemandeur().getId() != null) {
