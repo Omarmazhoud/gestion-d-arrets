@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "580942149304",
+    "project_id": "gestion-tickets-pfe",
+    "storage_bucket": "gestion-tickets-pfe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:580942149304:android:be0fc7f5022e2dd56ba64d",
+        "android_client_info": {
+          "package_name": "com.gestiontickets.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAc-UWKmDUFMjT5QnAV0sq_mqKsD2hsNZs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -53,6 +53,7 @@ Thumbs.db
 
 # Fichiers de configuration sensibles
 google-services.json
+!reactmobile/google-services.json
 firebase-adminsdk.json
 
 # Fichiers de compilation/logs inutiles
