@@ -78,6 +78,7 @@ public Utilisateur update(String id, Utilisateur newUser) {
     user.setEmail(newUser.getEmail());
     user.setMatricule(newUser.getMatricule());
     user.setRole(newUser.getRole());
+    user.setTypeExecuteur(newUser.getTypeExecuteur());
 
     // Si password non vide → modifier
     if (newUser.getPassword() != null && !newUser.getPassword().isEmpty()) {
