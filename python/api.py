@@ -253,8 +253,9 @@ def predict_panne_image():
         return jsonify({'error': str(e)}), 500
 
 
-# Lancer serveur
 if __name__ == '__main__':
     import os
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # Désactiver le mode debug en production sur Render pour économiser la RAM
+    is_prod = os.environ.get("RENDER") is not None
+    app.run(host='0.0.0.0', port=port, debug=not is_prod)
