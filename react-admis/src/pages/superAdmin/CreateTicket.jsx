@@ -125,43 +125,59 @@ export default function CreateTicket() {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = async () => {
-        const PYTHON_URL = "https://leoni-ia.onrender.com";
-        
-        // 1. Prédire le type d'arrêt via la photo
-        const responseCv = await fetch(`${PYTHON_URL}/predict-panne-image`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: reader.result })
-        });
-        const dataCv = await responseCv.json();
-
-        if (dataCv.error) throw new Error(dataCv.error);
-
-        if (dataCv.type_panne === "Image non reconnue") {
-          setError("L'IA n'a pas pu identifier la panne avec certitude.");
-        } else {
-          setForm(prev => ({ ...prev, typePanne: dataCv.type_panne }));
+        try {
+          const PYTHON_URL = "https://leoni-ia.onrender.com";
           
-          // 2. Prédire le service (exécuteur) idéal
-          const responseExec = await fetch(`${PYTHON_URL}/predict-executeur`, {
+          // 1. Prédire le type d'arrêt via la photo
+          const responseCv = await fetch(`${PYTHON_URL}/predict-panne-image`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ type_panne: dataCv.type_panne, type_poste: form.typePoste })
+            body: JSON.stringify({ image: reader.result })
           });
-          const dataExec = await responseExec.json();
           
-          setForm(prev => ({ 
-            ...prev, 
-            typeExecuteur: dataExec.type_executeur,
-            remarque: `(IA: Confiance ${(dataCv.confidence * 100).toFixed(1)}%) ${dataExec.commentaire_ia}`
-          }));
+          if (!responseCv.ok) {
+            throw new Error(`Erreur HTTP : ${responseCv.status}`);
+          }
           
-          setSuccess(`IA : Panne identifiée comme "${dataCv.type_panne.toUpperCase()}"`);
+          const dataCv = await responseCv.json();
+
+          if (dataCv.error) throw new Error(dataCv.error);
+
+          if (dataCv.type_panne === "Image non reconnue") {
+            setSuccess("");
+            setError("L'IA n'a pas pu identifier la panne avec certitude.");
+          } else {
+            setForm(prev => ({ ...prev, typePanne: dataCv.type_panne }));
+            
+            // 2. Prédire le service (exécuteur) idéal
+            const responseExec = await fetch(`${PYTHON_URL}/predict-executeur`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ type_panne: dataCv.type_panne, type_poste: form.typePoste })
+            });
+            
+            if (responseExec.ok) {
+              const dataExec = await responseExec.json();
+              setForm(prev => ({ 
+                ...prev, 
+                typeExecuteur: dataExec.type_executeur,
+                remarque: `(IA: Confiance ${(dataCv.confidence * 100).toFixed(1)}%) ${dataExec.commentaire_ia}`
+              }));
+            }
+            
+            setSuccess(`IA : Panne identifiée comme "${dataCv.type_panne.toUpperCase()}"`);
+          }
+        } catch (err) {
+          setSuccess("");
+          setError("Le serveur d'IA est temporairement injoignable ou en cours de démarrage.");
+          console.error(err);
+        } finally {
+          setLoading(false);
         }
       };
     } catch (err) {
-      setError("Le serveur d'IA est injoignable (Port 5000).");
-    } finally {
+      setSuccess("");
+      setError("Erreur lors de la lecture du fichier image.");
       setLoading(false);
     }
   };
