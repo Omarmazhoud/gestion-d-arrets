@@ -109,7 +109,7 @@ export default function AdminLayout() {
 
             <div style={menuGroupLabel}>CONFIG</div>
             <NavLink to="/admin/processes" style={navLinkStyle}>
-              <HiAdjustments size={20} /> Processes
+              <HiAdjustments size={20} /> Processus
             </NavLink>
             <NavLink to="/admin/secteurs" style={navLinkStyle}>
               <HiOfficeBuilding size={20} /> Segments

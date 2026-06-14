@@ -109,7 +109,7 @@ export default function SuperAdminLayout() {
 
             <div style={menuGroupLabel}>PRODUCTION</div>
             <NavLink to="/super-admin/processes" style={navLinkStyle}>
-              <HiAdjustments size={20} /> Processes
+              <HiAdjustments size={20} /> Processus
             </NavLink>
             <NavLink to="/super-admin/secteurs" style={navLinkStyle}>
               <HiOfficeBuilding size={20} /> Segments
