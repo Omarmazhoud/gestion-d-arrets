@@ -61,3 +61,8 @@ build_output*.txt
 
 # Python local dataset images
 python/dataset_images/
+
+# Python local duration models
+python/model_duree.pkl
+python/le_panne_duree.pkl
+python/le_exec_duree.pkl
