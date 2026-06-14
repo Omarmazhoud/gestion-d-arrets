@@ -8,30 +8,51 @@ CORS(app) # Autoriser les requêtes Cross-Origin (Web)
 
 
 # Charger le modèle ML Régression (Durée)
-try:
-    import os
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    model_duree = joblib.load(os.path.join(script_dir, "model_duree.pkl"))
-    le_panne_duree = joblib.load(os.path.join(script_dir, "le_panne_duree.pkl"))
-    le_exec_duree = joblib.load(os.path.join(script_dir, "le_exec_duree.pkl"))
-    has_duree_model = True
-except Exception as e:
-    print(f"[WARNING] Modele de duree non trouve ou incompatible : {e}. Tentative d'entrainement automatique...")
+import threading
+
+model_duree = None
+le_panne_duree = None
+le_exec_duree = None
+has_duree_model = False
+
+def init_duree_model():
+    global model_duree, le_panne_duree, le_exec_duree, has_duree_model
     try:
-        # Importer le script d'entraînement pour entraîner localement
-        from train_model_duree import train
-        train()
-        # Re-charger le modèle nouvellement entraîné
+        import os
+        script_dir = os.path.dirname(os.path.abspath(__file__))
         model_duree = joblib.load(os.path.join(script_dir, "model_duree.pkl"))
         le_panne_duree = joblib.load(os.path.join(script_dir, "le_panne_duree.pkl"))
         le_exec_duree = joblib.load(os.path.join(script_dir, "le_exec_duree.pkl"))
         has_duree_model = True
-        print("[OK] Modele de duree entraine et charge avec succes !")
-    except Exception as train_err:
-        import traceback
-        print(f"[ERROR] Impossible d'entrainer le modele de duree : {train_err}")
-        traceback.print_exc()
-        has_duree_model = False
+        print("[OK] Modele de duree charge avec succes.")
+    except Exception as e:
+        print(f"[WARNING] Modele de duree non trouve ou incompatible : {e}. Tentative d'entrainement automatique en arriere-plan...")
+        
+        def background_train():
+            global model_duree, le_panne_duree, le_exec_duree, has_duree_model
+            try:
+                # Importer le script d'entraînement pour entraîner localement
+                from train_model_duree import train
+                train()
+                # Re-charger le modèle nouvellement entraîné
+                import os
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                model_duree = joblib.load(os.path.join(script_dir, "model_duree.pkl"))
+                le_panne_duree = joblib.load(os.path.join(script_dir, "le_panne_duree.pkl"))
+                le_exec_duree = joblib.load(os.path.join(script_dir, "le_exec_duree.pkl"))
+                has_duree_model = True
+                print("[OK] Modele de duree entraine et charge en arriere-plan avec succes !")
+            except Exception as train_err:
+                import traceback
+                print(f"[ERROR] Impossible d'entrainer le modele de duree : {train_err}")
+                traceback.print_exc()
+        
+        # Démarrer l'entraînement dans un thread séparé pour ne pas bloquer Flask
+        t = threading.Thread(target=background_train)
+        t.daemon = True
+        t.start()
+
+init_duree_model()
 
 # Charger le modèle Computer Vision
 try:
