@@ -58,3 +58,6 @@ firebase-adminsdk.json
 
 # Fichiers de compilation/logs inutiles
 build_output*.txt
+
+# Python local dataset images
+python/dataset_images/

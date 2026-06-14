@@ -4,3 +4,8 @@ tensorflow-cpu
 joblib
 pillow
 numpy
+pandas
+scikit-learn
+sqlalchemy
+psycopg2-binary
+kagglehub

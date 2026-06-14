@@ -7,21 +7,25 @@ from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
 from tensorflow.keras.models import Model
 
-# Dossier d'entrée (à créer et remplir par l'utilisateur)
-DATASET_DIR = "dataset_images"
-MODEL_PATH = "modele_panne_cv.h5"
-LABELS_PATH = "labels_cv.pkl"
+import os
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Dossiers et fichiers (chemins absolus)
+DATASET_DIR = os.path.join(script_dir, "dataset_images")
+MODEL_PATH_H5 = os.path.join(script_dir, "modele_panne_cv.h5")
+MODEL_PATH_KERAS = os.path.join(script_dir, "modele_panne_cv.keras")
+LABELS_PATH = os.path.join(script_dir, "labels_cv.pkl")
 
 IMG_SIZE = (224, 224)
 BATCH_SIZE = 16
-EPOCHS = 10
+EPOCHS = 5
 
 def main():
-    print("⏳ Démarrage de l'entraînement du modèle Computer Vision...")
+    print("Demarrage de l'entrainement du modèle Computer Vision...")
     
     # Vérification du dataset
     if not os.path.exists(DATASET_DIR) or len(os.listdir(DATASET_DIR)) == 0:
-        print(f"❌ ERREUR: Le dossier '{DATASET_DIR}' est introuvable ou vide.")
+        print(f"ERREUR: Le dossier '{DATASET_DIR}' est introuvable ou vide.")
         print(f"Veuillez créer '{DATASET_DIR}' et y placer des sous-dossiers par type de panne (ex: mecanique/, electrique/).")
         return
 
@@ -37,7 +41,7 @@ def main():
         validation_split=0.2 # 20% pour la validation
     )
 
-    print("📁 Chargement des images d'entraînement...")
+    print("Chargement des images d'entraînement...")
     train_generator = datagen.flow_from_directory(
         DATASET_DIR,
         target_size=IMG_SIZE,
@@ -46,7 +50,7 @@ def main():
         subset='training'
     )
 
-    print("📁 Chargement des images de validation...")
+    print("Chargement des images de validation...")
     val_generator = datagen.flow_from_directory(
         DATASET_DIR,
         target_size=IMG_SIZE,
@@ -61,7 +65,7 @@ def main():
     # Sauvegarder les labels
     with open(LABELS_PATH, "wb") as f:
         pickle.dump(labels, f)
-    print(f"✅ Labels sauvegardés ({len(labels)} classes detectées : {labels})")
+    print(f"Labels sauvegardés ({len(labels)} classes detectées : {labels})")
 
     # Modèle de Transfer Learning (MobileNetV2, léger et performant)
     print("Création de l'architecture du réseau de neurones...")
@@ -81,16 +85,17 @@ def main():
 
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
-    print("🚀 Début de l'entraînement...")
+    print("Debut de l'entrainement...")
     model.fit(
         train_generator,
         epochs=EPOCHS,
         validation_data=val_generator
     )
 
-    # Sauvegarder le modèle
-    model.save(MODEL_PATH)
-    print(f" Modèle validé et sauvegardé avec succès dans '{MODEL_PATH}' !")
+    # Sauvegarder le modèle dans les deux formats (.keras et .h5)
+    model.save(MODEL_PATH_KERAS)
+    model.save(MODEL_PATH_H5)
+    print(f" Modèle validé et sauvegardé avec succès dans '{MODEL_PATH_KERAS}' et '{MODEL_PATH_H5}' !")
 
 if __name__ == "__main__":
     main()
