@@ -8,13 +8,20 @@ from sklearn.preprocessing import LabelEncoder
 import joblib
 from sqlalchemy import create_engine
 
-# Configuration de la base de données PostgreSQL
-DB_URL = "postgresql://omar:omar@localhost:5432/pfe"
+import os
+# Configuration de la base de données PostgreSQL (Lit la variable d'environnement de Render si disponible)
+env_db_url = os.environ.get("DATABASE_URL")
+# Convertir éventuellement "postgres://" en "postgresql://" car SQLAlchemy requiert postgresql://
+if env_db_url and env_db_url.startswith("postgres://"):
+    env_db_url = env_db_url.replace("postgres://", "postgresql://", 1)
+DB_URL = env_db_url or "postgresql://omar:omar@localhost:5432/pfe"
 
 def train():
     print("=========================================================")
     print("Demarrage de l'entrainement des modeles de duree (IA)")
     print("=========================================================\n")
+    
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     
     # 1. Lecture des données réelles de la base (Tickets avec durée calculée)
     data_db = pd.DataFrame()
@@ -24,14 +31,15 @@ def train():
         data_db = pd.read_sql(query, engine)
         print(f"OK: {len(data_db)} historiques reels recuperes depuis la base.")
     except Exception as e:
-        print(f"Erreur lecture base (pas encore de durees reelles ou base non accessible).")
+        print(f"Erreur lecture base (pas encore de durees reelles ou base non accessible) : {e}")
 
     # 2. Lecture du dataset CSV (Fallback / Valeurs types)
     try:
-        data_csv = pd.read_csv("dataset_duree.csv")
+        csv_path = os.path.join(script_dir, "dataset_duree.csv")
+        data_csv = pd.read_csv(csv_path)
         print(f"OK: {len(data_csv)} exemples charges depuis 'dataset_duree.csv'.")
     except Exception as e:
-        print(f"Erreur lecture CSV: {e}")
+        print(f"Erreur lecture CSV ({csv_path}): {e}")
         data_csv = pd.DataFrame()
 
     # 3. Fusion des données
@@ -100,11 +108,11 @@ def train():
     print(f"\nLe meilleur modele selectionne est : **{best_model_name}** (R2 = {best_r2:.4f})")
 
     # 8. Sauvegarde du meilleur modèle et des encodeurs
-    joblib.dump(best_model, "model_duree.pkl")
-    joblib.dump(le_panne, "le_panne_duree.pkl")
-    joblib.dump(le_exec, "le_exec_duree.pkl")
+    joblib.dump(best_model, os.path.join(script_dir, "model_duree.pkl"))
+    joblib.dump(le_panne, os.path.join(script_dir, "le_panne_duree.pkl"))
+    joblib.dump(le_exec, os.path.join(script_dir, "le_exec_duree.pkl"))
 
-    print(f"Le modele '{best_model_name}' a ete sauvegarde avec succes dans 'model_duree.pkl' !")
+    print(f"Le modele '{best_model_name}' a ete sauvegarde avec succes dans '{os.path.join(script_dir, 'model_duree.pkl')}' !")
 
 if __name__ == "__main__":
     train()

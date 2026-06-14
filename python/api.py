@@ -16,10 +16,22 @@ try:
     le_exec_duree = joblib.load(os.path.join(script_dir, "le_exec_duree.pkl"))
     has_duree_model = True
 except Exception as e:
-    import traceback
-    print(f"[WARNING] Modele de duree non trouve : {e}")
-    traceback.print_exc()
-    has_duree_model = False
+    print(f"[WARNING] Modele de duree non trouve ou incompatible : {e}. Tentative d'entrainement automatique...")
+    try:
+        # Importer le script d'entraînement pour entraîner localement
+        from train_model_duree import train
+        train()
+        # Re-charger le modèle nouvellement entraîné
+        model_duree = joblib.load(os.path.join(script_dir, "model_duree.pkl"))
+        le_panne_duree = joblib.load(os.path.join(script_dir, "le_panne_duree.pkl"))
+        le_exec_duree = joblib.load(os.path.join(script_dir, "le_exec_duree.pkl"))
+        has_duree_model = True
+        print("[OK] Modele de duree entraine et charge avec succes !")
+    except Exception as train_err:
+        import traceback
+        print(f"[ERROR] Impossible d'entrainer le modele de duree : {train_err}")
+        traceback.print_exc()
+        has_duree_model = False
 
 # Charger le modèle Computer Vision
 try:
