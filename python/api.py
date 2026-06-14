@@ -7,6 +7,9 @@ CORS(app) # Autoriser les requêtes Cross-Origin (Web)
 
 
 
+import os
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
 # Charger le modèle ML Régression (Durée)
 import threading
 
@@ -18,8 +21,6 @@ has_duree_model = False
 def init_duree_model():
     global model_duree, le_panne_duree, le_exec_duree, has_duree_model
     try:
-        import os
-        script_dir = os.path.dirname(os.path.abspath(__file__))
         model_duree = joblib.load(os.path.join(script_dir, "model_duree.pkl"))
         le_panne_duree = joblib.load(os.path.join(script_dir, "le_panne_duree.pkl"))
         le_exec_duree = joblib.load(os.path.join(script_dir, "le_exec_duree.pkl"))
