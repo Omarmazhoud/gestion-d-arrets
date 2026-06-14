@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { getTickets, adminUpdateTicket } from "../../services/ticketService";
 import { getUsers } from "../../services/userService";
 import { getSecteurs } from "../../services/secteurService";
@@ -19,7 +20,8 @@ import {
 function Tickets() {
   const [tickets, setTickets] = useState([]);
   const [filter, setFilter] = useState("ALL");
-  const [search, setSearch] = useState("");
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [editTicket, setEditTicket] = useState(null);
   // eslint-disable-next-line no-unused-vars
@@ -29,6 +31,13 @@ function Tickets() {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const isSuperAdmin = user?.role === "SUPER_ADMIN";
+
+  useEffect(() => {
+    const q = searchParams.get("search");
+    if (q !== null) {
+      setSearch(q);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     loadTickets();
@@ -76,7 +85,9 @@ function Tickets() {
   };
 
   const filteredTickets = tickets.filter((ticket) => {
-    const matchesSearch = ticket.description?.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = 
+      ticket.description?.toLowerCase().includes(search.toLowerCase()) ||
+      ticket.id?.toString().includes(search);
     const matchesFilter = filter === "ALL" || ticket.statut === filter;
     return matchesSearch && matchesFilter;
   }).sort((a, b) => new Date(b.dateCreation) - new Date(a.dateCreation));

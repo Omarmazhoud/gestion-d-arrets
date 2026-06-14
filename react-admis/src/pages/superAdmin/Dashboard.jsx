@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getStats } from "../../services/statsService";
 import { getNotificationsPiece, markNotificationAsRead } from "../../services/notificationPieceService";
 import {
@@ -16,6 +17,7 @@ import {
 } from "react-icons/fa";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({});
   const [user, setUser] = useState(null);
   const [notifsPiece, setNotifsPiece] = useState([]);
@@ -201,7 +203,22 @@ export default function Dashboard() {
                       <p style={{ margin: "0 0 8px 0", color: "#92400e", fontWeight: "600", fontSize: "15px" }}>
                         Une nouvelle pièce de référence "{n.referencePiece}" a été utilisée.
                       </p>
-                      <span style={{ fontSize: "12px", color: "#b45309" }}>Ticket ID: {n.ticketId}</span>
+                      <span 
+                        onClick={() => {
+                          const targetPath = isSuper ? `/super-admin/tickets?search=${n.ticketId}` : `/admin/tickets?search=${n.ticketId}`;
+                          navigate(targetPath);
+                        }}
+                        style={{ 
+                          fontSize: "12px", 
+                          color: "#3b82f6", 
+                          cursor: "pointer", 
+                          textDecoration: "underline",
+                          fontWeight: "700" 
+                        }}
+                        title="Cliquer pour aller au ticket"
+                      >
+                        Ticket ID: {n.ticketId} (Cliquez pour voir)
+                      </span>
                     </div>
                     <button 
                       onClick={async () => {
