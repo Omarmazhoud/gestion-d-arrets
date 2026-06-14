@@ -9,12 +9,16 @@ CORS(app) # Autoriser les requêtes Cross-Origin (Web)
 
 # Charger le modèle ML Régression (Durée)
 try:
-    model_duree = joblib.load("model_duree.pkl")
-    le_panne_duree = joblib.load("le_panne_duree.pkl")
-    le_exec_duree = joblib.load("le_exec_duree.pkl")
+    import os
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    model_duree = joblib.load(os.path.join(script_dir, "model_duree.pkl"))
+    le_panne_duree = joblib.load(os.path.join(script_dir, "le_panne_duree.pkl"))
+    le_exec_duree = joblib.load(os.path.join(script_dir, "le_exec_duree.pkl"))
     has_duree_model = True
-except:
-    print("[WARNING] Modele de duree non trouve. Il sera disponible apres le premier entrainement.")
+except Exception as e:
+    import traceback
+    print(f"[WARNING] Modele de duree non trouve : {e}")
+    traceback.print_exc()
     has_duree_model = False
 
 # Charger le modèle Computer Vision
@@ -47,14 +51,14 @@ try:
 
     print("IA : Tentative de chargement du modèle .keras avec Patch Global...")
     try:
-        model_cv = load_model("modele_panne_cv.keras", compile=False)
+        model_cv = load_model(os.path.join(script_dir, "modele_panne_cv.keras"), compile=False)
         print("IA : [OK] MODELE CHARGE AVEC SUCCES")
     except Exception as e:
         print(f"IA : [ERROR] ERREUR CRITIQUE CHARGEMENT : {str(e)}")
         model_cv = None
     
     try:
-        with open("labels_cv.pkl", "rb") as f:
+        with open(os.path.join(script_dir, "labels_cv.pkl"), "rb") as f:
             labels_cv = pickle.load(f)
         print("IA : [OK] LABELS CHARGES")
     except Exception as e:
